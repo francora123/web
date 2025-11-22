@@ -1,0 +1,274 @@
+/* Professional premium clean styles for Francesca Cora */
+
+:root{
+  --bg-1: #0b0b0b;
+  --bg-2: #26171a;
+  --rose: #d43a4c;
+  --sun1: #ffcea8;
+  --accent: rgba(30,215,96,0.36);
+  --glass: rgba(255,255,255,0.04);
+  --muted: rgba(255,255,255,0.65);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:Inter, system-ui, -apple-system, 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
+body{background:linear-gradient(180deg,var(--bg-2) 0%, var(--bg-1) 100%); color:#fff; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; overflow-x:hidden;}
+
+/* subtle decorative flower via svg data URI in pseudo element */
+.hero{position:relative;padding:64px 20px 40px;text-align:center;overflow:hidden}
+
+
+/* hero text */
+.hero-inner{position:relative;z-index:2;max-width:980px;margin:0 auto}
+.hero h1{font-size:44px;font-weight:800;line-height:1;margin-bottom:6px;background:linear-gradient(90deg,#fff,#f0e6e6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.tagline{font-size:18px;color:var(--muted);margin-bottom:12px}
+
+/* CTA row */
+.cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:6px}
+.cta-main{background:linear-gradient(135deg,var(--accent), rgba(30,215,96,0.2));padding:12px 22px;border-radius:999px;color:#fff;font-weight:700;text-decoration:none;border:1px solid rgba(30,215,96,0.45);box-shadow:0 10px 30px rgba(0,0,0,0.45)}
+.cta-secondary{background:transparent;padding:10px 18px;border-radius:999px;color:var(--muted);border:1px solid rgba(255,255,255,0.06);text-decoration:none}
+
+/* socials */
+.socials{margin-top:18px;display:flex;gap:10px;justify-content:center;z-index:2}
+.socials .btn{padding:10px 14px;border-radius:12px;background:var(--glass);color:#fff;text-decoration:none;border:1px solid rgba(255,255,255,0.04)}
+
+/* content layout */
+.content{max-width:1100px;margin:28px auto;padding:0 18px 48px}
+.video-card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));border-radius:14px;padding:14px;margin-bottom:18px;border:1px solid rgba(255,255,255,0.03);display:flex;gap:16px;align-items:center;flex-direction:column}
+.video-wrap{width:100%}
+.video-wrap iframe{width:100%;height:100%;aspect-ratio:16/9;border-radius:10px;border:none;display:block}
+
+/* grid for smaller videos */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:8px}
+.video-info{width:100%;text-align:center;padding-top:8px}
+.video-info h3,h4{margin:0 0 6px 0}
+.spotify-small{display:inline-block;padding:8px 12px;border-radius:999px;background:linear-gradient(135deg,rgba(30,215,96,0.18),rgba(30,215,96,0.06));color:#fff;text-decoration:none;font-weight:700}
+
+/* bio and contact */
+.bio{margin:28px 0;padding:18px;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)}
+.bio h2{margin-bottom:8px}
+.contact{margin:28px 0;padding:0 0 28px}
+.form-premium{max-width:640px;margin:12px auto;display:flex;flex-direction:column;gap:10px}
+.input-premium,.textarea-premium{padding:12px;border-radius:10px;background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.04);color:#fff}
+.btn-send{padding:12px;border-radius:10px;background:linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.06);color:#fff;font-weight:700}
+
+/* footer */
+footer{padding:26px 10px;color:var(--muted);text-align:center;font-size:14px}
+
+/* responsive */
+@media (max-width:900px){ .grid{grid-template-columns:1fr} .hero h1{font-size:36px} .hero{padding:48px 14px} }
+@media (max-width:520px){ .hero h1{font-size:30px} .tagline{font-size:15px} .cta-row{flex-direction:column} .grid{gap:12px}  }
+
+/* reveal class basic */
+.reveal{opacity:1;transform:none;transition:all .6s ease}
+
+
+/* Added full-page gradient fix */
+body {
+    background: linear-gradient(180deg, #0d0006 0%, #240011 40%, #300012 65%, #0d0006 100%);
+    background-attachment: fixed;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.hero {
+    background: transparent !important;
+}
+
+
+/* --- Added: animations & campaign landing & mobile tweaks --- */
+@keyframes fadeUp { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;} }
+.hero-inner, .video-card, .bio, .contact, .campaign-landing { animation: fadeUp .6s ease both; }
+
+/* campaign styles */
+.campaign-landing{max-width:1100px;margin:18px auto;padding:22px 18px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));border:1px solid rgba(255,255,255,0.03);text-align:center}
+.campaign-inner h2{font-size:22px;margin-bottom:6px}
+.campaign-inner .lead{color:var(--muted);margin-bottom:12px}
+.campaign-ctas{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:8px}
+.campaign-ctas .cta-main{padding:12px 20px}
+.campaign-ctas .cta-secondary{padding:10px 16px}
+
+/* subtle hover */
+a.cta-main:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(0,0,0,0.35);transition:all .18s ease}
+a.cta-secondary:hover{transform:translateY(-2px);transition:all .18s ease}
+
+/* variant styling for A/B */
+.variant-A .cta-main{background:linear-gradient(135deg,var(--accent), rgba(30,215,96,0.28));}
+.variant-B .cta-main{background:linear-gradient(135deg,#ff6b6b,#d43a4c);} /* red variant */
+
+@media (max-width:520px){
+  .hero{padding:40px 14px}
+  .hero h1{font-size:30px}
+  .campaign-inner h2{font-size:20px}
+  .campaign-ctas{flex-direction:column}
+  .video-wrap iframe{aspect-ratio:16/9;height:auto}
+}
+
+
+
+
+/* === BOTONES PREMIUM === */
+.btn-premium {
+    position: relative;
+    padding: 12px 22px;
+    border-radius: 999px;
+    font-weight: 700;
+    cursor: pointer;
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.btn-premium::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(120deg, rgba(255,255,255,0.18), rgba(255,255,255,0.02));
+    transition: transform .45s ease;
+}
+
+.btn-premium:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+}
+
+.btn-premium:hover::before {
+    transform: translateX(50%);
+}
+
+/* === SOCIAL BUTTON COLORS === */
+.btn-spotify {
+    background: #1DB954;
+    color: #fff;
+}
+
+.btn-youtube {
+    background: #FF0000;
+    color: #fff;
+}
+
+.btn-instagram {
+    background: linear-gradient(45deg, #FFC107, #F44336, #9C27B0);
+    color: #fff;
+}
+
+.btn-tiktok {
+    background: linear-gradient(90deg, #69C9D0, #EE1D52);
+    color: #fff;
+}
+
+.btn-x {
+    background: #000;
+    color: #fff;
+}
+
+.socials .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+}
+
+
+
+
+/* === BOTONES PREMIUM === */
+.btn-premium {
+    position: relative;
+    padding: 12px 22px;
+    border-radius: 999px;
+    font-weight: 700;
+    cursor: pointer;
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform .25s ease, box-shadow .25s ease;
+    display: inline-block;
+    text-align: center;
+}
+
+.btn-premium::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(120deg, rgba(255,255,255,0.25), rgba(255,255,255,0.05));
+    transition: all .45s ease;
+}
+
+.btn-premium:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+}
+
+.btn-premium:hover::before {
+    left: 0%;
+}
+
+/* === SOCIAL BUTTON COLORS === */
+.btn-spotify {
+    background: #1DB954 !important;
+    color: #fff !important;
+}
+
+.btn-youtube {
+    background: #FF0000 !important;
+    color: #fff !important;
+}
+
+.btn-instagram {
+    background: linear-gradient(45deg, #feda75, #fa7e1e, #d62976, #962fbf, #4f5bd5) !important;
+    color: #fff !important;
+}
+
+.btn-tiktok {
+    background: linear-gradient(90deg, #69C9D0, #EE1D52) !important;
+    color: #fff !important;
+}
+
+.btn-x {
+    background: #000 !important;
+    color: #fff !important;
+}
+
+/* Hover para redes */
+.btn-spotify:hover,
+.btn-youtube:hover,
+.btn-instagram:hover,
+.btn-tiktok:hover,
+.btn-x:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+}
+
+
+.btn-listen-spotify {
+    background: #1DB954 !important;
+    color: #fff !important;
+}
+
+.seo-block {
+    max-width: 900px;
+    margin: 60px auto 40px;
+    padding: 28px 32px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    backdrop-filter: blur(3px);
+}
+
+.seo-block h2 {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    color: #ffffff;
+}
+
+.seo-block p {
+    line-height: 1.7;
+    color: rgba(255,255,255,0.75);
+    font-size: 16px;
+}
+

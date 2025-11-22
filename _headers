@@ -1,0 +1,29 @@
+/*
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), clipboard-read=(), clipboard-write=(), fullscreen=(), payment=()
+
+  Content-Security-Policy:
+    default-src 'self';
+    img-src 'self' https: data:;
+    style-src 'self' 'unsafe-inline';
+    script-src 'self'
+      https://www.gstatic.com
+      https://www.youtube.com
+      https://www.youtube-nocookie.com
+      https://s.ytimg.com
+      https://i.ytimg.com
+      https://www.googletagmanager.com
+      https://www.google-analytics.com
+      'unsafe-inline';
+    frame-src
+      https://www.youtube.com
+      https://www.youtube-nocookie.com;
+    connect-src
+      'self'
+      https://www.google-analytics.com
+      https://api.web3forms.com;
+    media-src 'self' https:;
+    worker-src 'self' blob:;

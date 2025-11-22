@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Ping Sitemaps — Francesca Cora</title>
+</head>
+<body>
+<h2>Ping enviado a los motores de búsqueda</h2>
+<p>Google y Bing han sido notificados.</p>
+
+<script>
+const sitemap = encodeURIComponent("https://francescacora.info/sitemap.xml");
+fetch("https://www.google.com/ping?sitemap=" + sitemap);
+fetch("https://www.bing.com/ping?sitemap=" + sitemap);
+</script>
+
+</body>
+</html>
