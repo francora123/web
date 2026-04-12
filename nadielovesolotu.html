@@ -1,143 +1,203 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Para ti</title>
 
 <style>
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 
 body{
-    margin:0;
-    height:100dvh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:#000;
-    overflow:hidden;
-    font-family: Georgia, serif;
+margin:0;
+height:100dvh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:#000;
+overflow:hidden;
+font-family:Georgia,serif;
 }
 
 /* CONTENEDOR */
 .viewport{
-    position:relative;
-    width:88vw;
-    height:78dvh;
-    background:#f4e4bc;
-    overflow:hidden;
-    box-shadow:0 0 60px rgba(0,0,0,.9);
+position:relative;
+width:88vw;
+height:78dvh;
+background:#f4e4bc;
+overflow:hidden;
+box-shadow:0 0 80px rgba(0,0,0,.9);
 }
 
 /* TEXTO */
 #texto{
-    position:absolute;
-    top:100%;
-    width:100%;
-    padding:40px 26px;
-    color:#2c1b18;
-    font-size:1.1rem;
-    line-height:1.75;
-    animation: subir 55s linear forwards;
+position:absolute;
+top:100%;
+width:100%;
+padding:40px 26px;
+color:#2c1b18;
+font-size:1.1rem;
+line-height:1.75;
+white-space:pre-line;
 }
 
-@keyframes subir{
-    0%{ transform:translateY(0); opacity:1; }
-    85%{ opacity:1; }
-    100%{ transform:translateY(-120%); opacity:0.15; }
+/* typing cursor */
+.cursor{
+display:inline-block;
+width:10px;
+background:#2c1b18;
+animation:blink .8s infinite;
+}
+
+@keyframes blink{
+50%{opacity:0;}
 }
 
 /* FUEGO */
 .fuego{
-    position:absolute;
-    bottom:0;
-    width:100%;
-    height:14px;
-    background:linear-gradient(to top,#ff3b00,#ff9a00,transparent);
-    box-shadow:0 -10px 25px #ff3b00,0 -20px 60px #ff0000;
+position:absolute;
+bottom:0;
+width:100%;
+height:16px;
+background:linear-gradient(to top,#ff3b00,#ff9a00,transparent);
+box-shadow:0 -10px 30px #ff3b00,0 -25px 70px #ff0000;
 }
 
 /* CARBÓN */
 .carbon{
-    position:absolute;
-    bottom:0;
-    width:100%;
-    height:100%;
-    background:#000;
-    transform:translateY(100%);
-    animation: quemado 55s linear forwards;
-}
-
-@keyframes quemado{
-    0%,85%{ transform:translateY(100%); }
-    100%{ transform:translateY(0%); }
+position:absolute;
+bottom:0;
+width:100%;
+height:100%;
+background:#000;
+transform:translateY(100%);
 }
 
 /* FINAL */
 #final{
-    position:fixed;
-    width:85%;
-    text-align:center;
-    color:rgba(244,228,188,0.75);
-    font-style:italic;
-    font-size:1.1rem;
-    opacity:0;
-    animation: show 3s ease forwards;
-    animation-delay:56s;
+position:fixed;
+width:85%;
+text-align:center;
+color:rgba(244,228,188,.8);
+font-style:italic;
+opacity:0;
 }
 
-@keyframes show{
-    to{ opacity:1; }
+@keyframes showFinal{
+to{opacity:1;}
 }
 
 /* CENIZAS */
 .ceniza{
-    position:absolute;
-    background:#fff;
-    border-radius:50%;
-    opacity:0.25;
-    animation: caer linear infinite;
+position:absolute;
+background:#fff;
+border-radius:50%;
+opacity:.2;
+animation:fall linear infinite;
 }
 
-@keyframes caer{
-    0%{ transform:translateY(100vh); opacity:0; }
-    20%{ opacity:.3; }
-    100%{ transform:translateY(-20vh) translateX(30px); opacity:0; }
+@keyframes fall{
+0%{transform:translateY(100vh);opacity:0;}
+20%{opacity:.3;}
+100%{transform:translateY(-20vh) translateX(40px);opacity:0;}
+}
+
+/* OVERLAY INICIO */
+#start{
+position:fixed;
+inset:0;
+display:flex;
+justify-content:center;
+align-items:center;
+background:#000;
+color:#f4e4bc;
+font-size:1rem;
+z-index:999;
 }
 </style>
 </head>
 
 <body>
 
-<div id="final">No entres en pánico… esto solo lo puedes ver tú.</div>
+<div id="start">toca para empezar</div>
 
 <div class="viewport">
 
-    <div id="texto">
-        Se que la cague y es la parte mas dificil, la de no poder echarle la culpa a nadie más que a mi mismo, tuve algo real en mis manos algo que no se encuentra facil y lo rompi y no era porque no te quisiera sino porque no supe manejar lo que me pasaba por dentro, el miedo la inseguridad… ese enfado que a veces tenia y ni siquiera entendia de donde venia, lo peor es que tu eras justo lo que necesitaba tu forma de ver la vida tu calma tu humor esa manera tuya de hacer que todo fuera mas sencillo sin darte cuenta, contigo me sentia bien… aunque muchas veces fui incapaz de demostartelo o de cuidarlo como debia. <br><br>
+<div id="texto"></div>
 
-        No siempre el amor es suficiente cuando uno no esta bien consigo mismo y yo no lo estaba… y la verdad es que todavia estoy intentando estarlo. Hoy me pesa saber que eras mi lugar seguro y que fui yo quien lo quemo y duele de una forma que no se ni como explicar bien, saber que eras todo lo que queria y aun asi convertirme en mi propio peor enemigo.
-    </div>
+<div class="fuego"></div>
+<div class="carbon"></div>
 
-    <div class="fuego"></div>
-    <div class="carbon"></div>
 </div>
 
+<div id="final">No entres en pánico… esto solo lo puedes ver tú.</div>
+
+<!-- AUDIO OPCIONAL -->
+<audio id="audio" loop>
+<source src="https://cdn.pixabay.com/audio/2022/10/16/audio_12b6b5d3c6.mp3" type="audio/mp3">
+</audio>
+
 <script>
-// CENIZAS PRO
-for(let i=0;i<35;i++){
-    const c=document.createElement("div");
-    c.className="ceniza";
+const text = `Se que la cague y es la parte mas dificil, la de no poder echarle la culpa a nadie más que a mi mismo, tuve algo real en mis manos algo que no se encuentra facil y lo rompi y no era porque no te quisiera sino porque no supe manejar lo que me pasaba por dentro, el miedo la inseguridad… ese enfado que a veces tenia y ni siquiera entendia de donde venia, lo peor es que tu eras justo lo que necesitaba tu forma de ver la vida tu calma tu humor esa manera tuya de hacer que todo fuera mas sencillo sin darte cuenta, contigo me sentia bien… aunque muchas veces fui incapaz de demostartelo o de cuidarlo como debia.
 
-    const size = Math.random()*3+1;
-    c.style.width=size+"px";
-    c.style.height=size+"px";
+No siempre el amor es suficiente cuando uno no esta bien consigo mismo y yo no lo estaba… y la verdad es que todavia estoy intentando estarlo. Hoy me pesa saber que eras mi lugar seguro y que fui yo quien lo quemo y duele de una forma que no se ni como explicar bien, saber que eras todo lo que queria y aun asi convertirme en mi propio peor enemigo.`;
 
-    c.style.left=Math.random()*100+"vw";
-    c.style.animationDuration=(3+Math.random()*5)+"s";
-    c.style.animationDelay=Math.random()*5+"s";
+const textoEl = document.getElementById("texto");
+const start = document.getElementById("start");
+const audio = document.getElementById("audio");
 
-    document.body.appendChild(c);
+let i = 0;
+
+function type(){
+if(i < text.length){
+textoEl.innerHTML += text[i];
+i++;
+
+// efecto suave scroll automático
+textoEl.style.transform = `translateY(-${i*0.15}px)`;
+
+setTimeout(type, 25);
+}else{
+finish();
+}
+}
+
+function finish(){
+document.getElementById("final").style.animation = "showFinal 3s forwards";
+document.getElementById("final").style.bottom = "10%";
+
+document.querySelector(".carbon").style.transition="2s";
+document.querySelector(".carbon").style.transform="translateY(0%)";
+
+// vibración móvil (si existe)
+if(navigator.vibrate){
+navigator.vibrate([200,100,300,100,500]);
+}
+}
+
+/* START */
+start.addEventListener("click",()=>{
+start.style.display="none";
+audio.volume = 0.4;
+audio.play().catch(()=>{});
+
+type();
+});
+
+/* CENIZAS */
+for(let i=0;i<40;i++){
+const c=document.createElement("div");
+c.className="ceniza";
+
+const s=Math.random()*3+1;
+c.style.width=s+"px";
+c.style.height=s+"px";
+
+c.style.left=Math.random()*100+"vw";
+c.style.animationDuration=(3+Math.random()*6)+"s";
+c.style.animationDelay=Math.random()*5+"s";
+
+document.body.appendChild(c);
 }
 </script>
 
