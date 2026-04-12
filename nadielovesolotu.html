@@ -5,131 +5,122 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Para ti</title>
     <style>
-        * { box-sizing: border-box; }
         body {
             background-color: #000;
             margin: 0; padding: 0;
             display: flex; justify-content: center; align-items: center;
-            height: 100vh; width: 100vw;
-            overflow: hidden;
+            height: 100dvh; width: 100vw;
             font-family: 'Georgia', serif;
-        }
-
-        /* Contenedor principal */
-        .escena {
-            position: relative;
-            width: 90%;
-            max-width: 380px;
-            height: 80vh;
-            display: flex;
-            align-items: flex-start;
-        }
-
-        /* El papel */
-        .carta {
-            background: #f4e4bc;
-            width: 100%;
-            padding: 30px;
-            position: relative;
-            box-shadow: 0 0 40px rgba(0,0,0,0.8);
-            color: #2c1b18;
             overflow: hidden;
-            /* Control de desintegración */
-            height: 100%;
-            animation: consumirPapel 60s forwards linear;
         }
 
-        /* Línea de fuego y brasas */
-        .linea-fuego {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 4px;
-            background: #ff4500;
-            box-shadow: 0 0 20px 5px #ff4500, 0 0 40px 10px #ff8c00;
-            z-index: 10;
-            animation: bajarFuego 60s forwards linear;
+        /* Contenedor que centra la carta en cualquier móvil */
+        #main-container {
+            width: 90%;
+            max-width: 400px;
+            height: 70vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
         }
+
+        .paper {
+            background: #f4e4bc;
+            padding: 25px;
+            position: relative;
+            color: #2c1b18;
+            overflow-y: auto; /* Permite leer si el móvil es pequeño */
+            height: 100%;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            scrollbar-width: none; /* Oculta scroll en Firefox */
+        }
+
+        .paper::-webkit-scrollbar { display: none; } /* Oculta scroll en Chrome/Safari */
 
         p {
-            font-size: 1.05rem;
-            line-height: 1.65;
+            font-size: 1.1rem;
+            line-height: 1.7;
             margin: 0;
-            text-align: justify;
-            transition: color 0.5s;
+            text-align: left;
+            transition: opacity 0.5s;
         }
 
-        /* Animaciones para móvil */
-        @keyframes consumirPapel {
-            0% { clip-path: inset(0% 0% 0% 0%); background: #f4e4bc; }
-            50% { background: #c5a381; }
-            90% { opacity: 1; }
-            100% { clip-path: inset(100% 0% 0% 0%); opacity: 0; }
-        }
-
-        @keyframes bajarFuego {
-            0% { top: 0%; opacity: 0; }
-            2% { opacity: 1; }
-            100% { top: 100%; opacity: 1; }
-        }
-
-        /* Chispas flotantes */
-        .chispa {
+        /* La brasa de fuego que baja */
+        #fire-line {
             position: absolute;
-            width: 3px; height: 3px;
-            background: #ff8c00;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 20;
-            animation: volarChispa 2s forwards ease-out;
+            top: 0; left: 0;
+            width: 100%; height: 6px;
+            background: linear-gradient(to bottom, #ff4500, #ff8c00);
+            box-shadow: 0 0 15px #ff4500, 0 0 30px #ff0000;
+            z-index: 100;
+            display: none; /* Aparece al iniciar */
         }
 
-        @keyframes volarChispa {
-            0% { transform: translate(0, 0); opacity: 1; }
-            100% { transform: translate(30px, -100px); opacity: 0; }
+        /* Overlay negro que va cubriendo el papel */
+        #burn-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 0%;
+            background: rgba(0,0,0,0.95);
+            z-index: 50;
+        }
+
+        #start-btn {
+            position: absolute;
+            z-index: 200;
+            padding: 15px 30px;
+            background: #f4e4bc;
+            border: none;
+            font-family: 'Georgia', serif;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
         }
     </style>
 </head>
 <body>
 
-    <div class="escena">
-        <div class="carta" id="carta">
-            <div class="linea-fuego" id="fuego"></div>
-            <p id="texto">
+    <button id="start-btn" onclick="startBurning()">Abrir carta</button>
+
+    <div id="main-container">
+        <div id="fire-line"></div>
+        <div id="burn-overlay"></div>
+        <div class="paper">
+            <p>
                 Se que la cague y es la parte mas dificil, la de no poder echarle la culpa a nadie más que a mi mismo, tuve algo real en mis manos algo que no se encuentra facil y lo rompi y no era porque no te quisiera sino porque no supe manejar lo que me pasaba por dentro, el miedo la inseguridad… ese enfado que a veces tenia y ni siquiera entendia de donde venia, lo peor es que tu eras justo lo que necesitaba tu forma de ver la vida tu calma tu humor esa manera tuya de hacer que todo fuera mas sencillo sin darte cuenta, contigo me sentia bien… aunque muchas veces fui incapaz de demostartelo o de cuidarlo como debia. No siempre el amor es suficiente cuando uno no esta bien consigo mismo y yo no lo estaba… y la verdad es que todavia estoy intentando estarlo. Hoy me pesa saber que eras mi lugar seguro y que fui yo quien lo quemo y duele de una forma que no se ni como explicar bien, saber que eras todo lo que queria y aun asi convertirme en mi propio peor enemigo.
             </p>
         </div>
     </div>
 
     <script>
-        const fuego = document.getElementById('fuego');
-        
-        // Crear chispas que sigan a la línea de fuego
-        function crearChispas() {
-            const rect = fuego.getBoundingClientRect();
-            for(let i=0; i<3; i++) {
-                const chispa = document.createElement('div');
-                chispa.className = 'chispa';
-                chispa.style.left = (Math.random() * 100) + '%';
-                // La chispa sale de la posición actual de la línea de fuego
-                chispa.style.top = rect.top + 'px';
-                document.body.appendChild(chispa);
-                setTimeout(() => chispa.remove(), 2000);
+        function startBurning() {
+            const btn = document.getElementById('start-btn');
+            const fire = document.getElementById('fire-line');
+            const overlay = document.getElementById('burn-overlay');
+            const duration = 60000; // 60 segundos
+            
+            btn.style.display = 'none';
+            fire.style.display = 'block';
+
+            let start = null;
+
+            function animate(timestamp) {
+                if (!start) start = timestamp;
+                let progress = timestamp - start;
+                let percent = Math.min((progress / duration) * 100, 100);
+
+                fire.style.top = percent + "%";
+                overlay.style.height = percent + "%";
+
+                if (progress < duration) {
+                    requestAnimationFrame(animate);
+                } else {
+                    fire.style.display = 'none';
+                }
             }
+
+            requestAnimationFrame(animate);
         }
-
-        // Intervalo para chispas constante
-        setInterval(crearChispas, 150);
-
-        // Efecto visual: el texto se vuelve "brasas" al acercarse el fuego
-        const texto = document.getElementById('texto');
-        setTimeout(() => {
-            // A los 45 segundos el texto empieza a ponerse rojo/negro
-            texto.style.transition = "color 10s";
-            texto.style.color = "#ff4500";
-            setTimeout(() => {
-                texto.style.color = "#000";
-            }, 10000);
-        }, 40000);
     </script>
 </body>
 </html>
