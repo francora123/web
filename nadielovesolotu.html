@@ -12,57 +12,55 @@
             height: 100dvh; width: 100vw;
             font-family: 'Georgia', serif;
             overflow: hidden;
+            touch-action: none; /* Evita rebotes del navegador */
         }
 
-        /* Contenedor que centra la carta en cualquier móvil */
         #main-container {
             width: 90%;
             max-width: 400px;
-            height: 70vh;
+            height: 75vh;
             position: relative;
-            display: flex;
-            flex-direction: column;
+            background: #f4e4bc;
+            box-shadow: 0 0 40px rgba(0,0,0,1);
         }
 
         .paper {
-            background: #f4e4bc;
-            padding: 25px;
-            position: relative;
-            color: #2c1b18;
-            overflow-y: auto; /* Permite leer si el móvil es pequeño */
+            width: 100%;
             height: 100%;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            scrollbar-width: none; /* Oculta scroll en Firefox */
+            padding: 30px;
+            color: #2c1b18;
+            overflow-y: auto; /* PERMITE BAJAR CON EL DEDO */
+            position: relative;
+            z-index: 10;
+            -webkit-overflow-scrolling: touch;
         }
-
-        .paper::-webkit-scrollbar { display: none; } /* Oculta scroll en Chrome/Safari */
 
         p {
-            font-size: 1.1rem;
-            line-height: 1.7;
+            font-size: 1.15rem;
+            line-height: 1.8;
             margin: 0;
-            text-align: left;
-            transition: opacity 0.5s;
+            padding-bottom: 100px; /* Espacio extra para que el final no se tape rápido */
         }
 
-        /* La brasa de fuego que baja */
+        /* CAPAS VISUALES (No bloquean el tacto) */
         #fire-line {
             position: absolute;
             top: 0; left: 0;
-            width: 100%; height: 6px;
+            width: 100%; height: 8px;
             background: linear-gradient(to bottom, #ff4500, #ff8c00);
-            box-shadow: 0 0 15px #ff4500, 0 0 30px #ff0000;
+            box-shadow: 0 0 20px #ff4500, 0 0 40px #ff0000;
             z-index: 100;
-            display: none; /* Aparece al iniciar */
+            display: none;
+            pointer-events: none; /* EL DEDO PASA A TRAVÉS */
         }
 
-        /* Overlay negro que va cubriendo el papel */
         #burn-overlay {
             position: absolute;
             top: 0; left: 0;
             width: 100%; height: 0%;
-            background: rgba(0,0,0,0.95);
+            background: linear-gradient(to bottom, rgba(0,0,0,1) 80%, rgba(0,0,0,0.7) 100%);
             z-index: 50;
+            pointer-events: none; /* EL DEDO PASA A TRAVÉS */
         }
 
         #start-btn {
@@ -70,22 +68,21 @@
             z-index: 200;
             padding: 15px 30px;
             background: #f4e4bc;
-            border: none;
-            font-family: 'Georgia', serif;
-            font-size: 1rem;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+            border: 2px solid #2c1b18;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c1b18;
         }
     </style>
 </head>
 <body>
 
-    <button id="start-btn" onclick="startBurning()">Abrir carta</button>
+    <button id="start-btn" onclick="startBurning()">LEER CARTA</button>
 
     <div id="main-container">
         <div id="fire-line"></div>
         <div id="burn-overlay"></div>
-        <div class="paper">
+        <div class="paper" id="scroll-area">
             <p>
                 Se que la cague y es la parte mas dificil, la de no poder echarle la culpa a nadie más que a mi mismo, tuve algo real en mis manos algo que no se encuentra facil y lo rompi y no era porque no te quisiera sino porque no supe manejar lo que me pasaba por dentro, el miedo la inseguridad… ese enfado que a veces tenia y ni siquiera entendia de donde venia, lo peor es que tu eras justo lo que necesitaba tu forma de ver la vida tu calma tu humor esa manera tuya de hacer que todo fuera mas sencillo sin darte cuenta, contigo me sentia bien… aunque muchas veces fui incapaz de demostartelo o de cuidarlo como debia. No siempre el amor es suficiente cuando uno no esta bien consigo mismo y yo no lo estaba… y la verdad es que todavia estoy intentando estarlo. Hoy me pesa saber que eras mi lugar seguro y que fui yo quien lo quemo y duele de una forma que no se ni como explicar bien, saber que eras todo lo que queria y aun asi convertirme en mi propio peor enemigo.
             </p>
@@ -97,7 +94,7 @@
             const btn = document.getElementById('start-btn');
             const fire = document.getElementById('fire-line');
             const overlay = document.getElementById('burn-overlay');
-            const duration = 60000; // 60 segundos
+            const duration = 60000; // 1 minuto para leer
             
             btn.style.display = 'none';
             fire.style.display = 'block';
@@ -114,8 +111,6 @@
 
                 if (progress < duration) {
                     requestAnimationFrame(animate);
-                } else {
-                    fire.style.display = 'none';
                 }
             }
 
