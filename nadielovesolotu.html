@@ -1,5 +1,3 @@
-Aquí tienes la versión pulida. He añadido un efecto de **"partículas de ceniza"** que siguen el dedo y he mejorado el sistema de escritura para que el texto sea legible (con scroll automático) mientras la persona mantiene presionado.
-```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,69 +5,65 @@ Aquí tienes la versión pulida. He añadido un efecto de **"partículas de ceni
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Para ti</title>
 <style>
-    body { margin: 0; background: #050505; overflow: hidden; font-family: 'Georgia', serif; color: #f4e4bc; }
+    body { margin: 0; background: #000; overflow: hidden; font-family: 'Georgia', serif; color: #f4e4bc; }
     
-    #game-container { 
-        position: relative; 
-        width: 100vw; 
-        height: 100dvh; 
-        display: flex; 
-        flex-direction: column;
-        justify-content: center; 
-        align-items: center; 
+    /* Pantalla de Bloqueo */
+    #lock-screen {
+        position: fixed; inset: 0; background: #000; z-index: 1000;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        transition: opacity 1s;
     }
-    
-    #texto-carta {
-        width: 85%;
-        max-height: 60vh;
-        text-align: center;
-        line-height: 1.8;
-        font-size: 1.1rem;
-        opacity: 0;
-        transition: opacity 0.4s;
-        z-index: 1;
-        overflow-y: hidden;
-        white-space: pre-line;
+    input { 
+        background: transparent; border: none; border-bottom: 1px solid #333; 
+        color: #f4e4bc; text-align: center; font-size: 1.2rem; outline: none; padding: 10px;
+        font-family: 'Georgia', serif;
     }
 
-    #overlay {
-        position: absolute;
-        inset: 0;
-        /* Efecto linterna */
-        background: radial-gradient(circle at var(--x) var(--y), transparent 8%, rgba(0,0,0,0.92) 20%);
-        z-index: 2;
-        pointer-events: none;
+    /* Juego y Carta */
+    #game-container { position: relative; width: 100vw; height: 100dvh; display: flex; justify-content: center; align-items: center; opacity: 0; transition: 1s; }
+    
+    #texto-carta { 
+        width: 80%; 
+        text-align: center; 
+        line-height: 1.8; 
+        font-size: 1.1rem; 
+        opacity: 0.1; 
+        transition: opacity 0.5s; 
+        z-index: 1; 
+        white-space: pre-line; 
     }
 
-    #instrucciones {
-        position: fixed;
-        bottom: 10%;
-        width: 100%;
-        text-align: center;
-        font-style: italic;
-        color: #666;
-        z-index: 3;
-        font-size: 0.9rem;
-        transition: opacity 0.5s;
+    #overlay { 
+        position: absolute; 
+        inset: 0; 
+        background: radial-gradient(circle at var(--x) var(--y), transparent 10%, rgba(0,0,0,0.98) 25%); 
+        z-index: 2; 
+        pointer-events: none; 
+    }
+
+    #instrucciones { 
+        position: fixed; 
+        top: 20px; 
+        width: 100%; 
+        text-align: center; 
+        font-style: italic; 
+        color: #555; 
+        z-index: 3; 
+        opacity: 0; 
+        transition: opacity 1s;
     }
 
     .active #texto-carta { opacity: 1; }
-    .active #instrucciones { opacity: 0; }
-
-    .ceniza {
-        position: absolute;
-        width: 4px;
-        height: 4px;
-        background: rgba(255,255,255,0.3);
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 4;
-    }
+    .unlocked #game-container, .unlocked #instrucciones { opacity: 1; }
 </style>
 </head>
 <body>
 
-<div id="instrucciones">Mantén presionado para disipar las cenizas y leer...</div>
+<div id="lock-screen">
+    <input type="password" id="pass" placeholder="Escribe aquí..." autofocus>
+</div>
+
+<div id="instrucciones">Mantén presionado para disipar el humo...</div>
 
 <div id="game-container">
     <div id="texto-carta"></div>
@@ -77,49 +71,46 @@ Aquí tienes la versión pulida. He añadido un efecto de **"partículas de ceni
 </div>
 
 <script>
-const carta = `Se que la cague y es la parte mas dificil, la de no poder echarle la culpa a nadie más que a mi mismo. Tuve algo real en mis manos y lo rompi. No era porque no te quisiera, sino porque no supe manejar lo que me pasaba por dentro... el miedo, la inseguridad.
+const CLAVE = "miaw"; 
+const carta = `Se que la cague y es la parte mas dificil, la de no poder echarle la culpa a nadie más que a mi mismo, tuve algo real en mis manos algo que no se encuentra facil y lo rompi y no era porque no te quisiera sino porque no supe manejar lo que me pasaba por dentro, el miedo la inseguridad… ese enfado que a veces tenia y ni siquiera entendia de donde venia, lo peor es que tu eras justo lo que necesitaba tu forma de ver la vida tu calma tu humor esa manera tuya de hacer que todo fuera mas sencillo sin darte cuenta, contigo me sentia bien… aunque muchas veces fui incapaz de demostartelo o de cuidarlo como debia.
 
-Fuiste mi lugar seguro y fui yo quien lo quemo. Me duele saber que eras todo lo que queria y aun asi me converti en mi propio enemigo.`;
+No siempre el amor es suficiente cuando uno no esta bien consigo mismo y yo no lo estaba… y la verdad es que todavia estoy intentando estarlo. Hoy me pesa saber que eras mi lugar seguro y que fui yo quien lo quemo y duele de una forma que no se ni como explicar bien, saber que eras todo lo que queria y aun asi convertirme en mi propio peor enemigo.`;
 
+const passInput = document.getElementById('pass');
+const lockScreen = document.getElementById('lock-screen');
 const contenedor = document.getElementById('texto-carta');
 const overlay = document.getElementById('overlay');
 let index = 0;
 let isPressing = false;
+let accessGranted = false;
 
-function createCeniza(x, y) {
-    const c = document.createElement('div');
-    c.className = 'ceniza';
-    c.style.left = x + 'px';
-    c.style.top = y + 'px';
-    document.body.appendChild(c);
-    
-    const anim = c.animate([
-        { transform: 'translate(0,0) scale(1)', opacity: 0.8 },
-        { transform: `translate(${(Math.random()-0.5)*100}px, -100px) scale(0)`, opacity: 0 }
-    ], { duration: 1500, easing: 'ease-out' });
-    
-    anim.onfinish = () => c.remove();
-}
+passInput.addEventListener('input', (e) => {
+    if(e.target.value.toLowerCase() === CLAVE) {
+        accessGranted = true;
+        lockScreen.style.opacity = "0";
+        document.body.classList.add('unlocked');
+        setTimeout(() => lockScreen.remove(), 1000);
+    }
+});
 
 const updateSpotlight = (e) => {
-    const x = (e.touches ? e.touches[0].clientX : e.clientX);
-    const y = (e.touches ? e.touches[0].clientY : e.clientY);
+    if(!accessGranted) return;
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
     overlay.style.setProperty('--x', `${x}px`);
     overlay.style.setProperty('--y', `${y}px`);
-    if(isPressing) createCeniza(x, y);
 };
 
 function type() {
     if (isPressing && index < carta.length) {
         contenedor.innerHTML += carta[index];
         index++;
-        // Scroll automático hacia abajo
-        contenedor.scrollTop = contenedor.scrollHeight;
-        setTimeout(type, 50);
+        setTimeout(type, 35);
     }
 }
 
 const start = (e) => {
+    if(!accessGranted) return;
     isPressing = true;
     document.body.classList.add('active');
     updateSpotlight(e);
@@ -140,5 +131,3 @@ window.addEventListener('touchmove', updateSpotlight);
 </script>
 </body>
 </html>
-
-```
