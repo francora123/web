@@ -5,117 +5,173 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Para ti</title>
     <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             background-color: #000;
             margin: 0; padding: 0;
-            display: flex; justify-content: center; align-items: center;
             height: 100dvh; width: 100vw;
+            display: flex; justify-content: center; align-items: center;
             font-family: 'Georgia', serif;
             overflow: hidden;
-            touch-action: none; /* Evita rebotes del navegador */
+            color: #f4e4bc;
         }
 
-        #main-container {
-            width: 90%;
+        /* Partículas de ceniza */
+        #canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 1;
+        }
+
+        .contenedor-premium {
+            position: relative;
+            width: 85%;
             max-width: 400px;
-            height: 75vh;
-            position: relative;
+            height: 65vh;
             background: #f4e4bc;
-            box-shadow: 0 0 40px rgba(0,0,0,1);
+            box-shadow: 0 0 60px rgba(0,0,0,1);
+            overflow: hidden;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            transition: opacity 2s ease-in-out;
         }
 
-        .paper {
-            width: 100%;
-            height: 100%;
-            padding: 30px;
-            color: #2c1b18;
-            overflow-y: auto; /* PERMITE BAJAR CON EL DEDO */
+        #scroll-content {
             position: relative;
-            z-index: 10;
-            -webkit-overflow-scrolling: touch;
+            padding: 50px 30px;
+            transform: translateY(0);
+            will-change: transform;
         }
 
         p {
             font-size: 1.15rem;
-            line-height: 1.8;
+            line-height: 1.9;
+            color: #2c1b18;
             margin: 0;
-            padding-bottom: 100px; /* Espacio extra para que el final no se tape rápido */
+            text-align: justify;
         }
 
-        /* CAPAS VISUALES (No bloquean el tacto) */
-        #fire-line {
+        .fuego-linea {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 8px;
-            background: linear-gradient(to bottom, #ff4500, #ff8c00);
-            box-shadow: 0 0 20px #ff4500, 0 0 40px #ff0000;
+            bottom: 0; left: 0; width: 100%;
+            height: 8px;
+            background: linear-gradient(to top, #ff4500, #ff8c00, transparent);
+            box-shadow: 0 -10px 25px #ff4500, 0 -20px 50px #ff0000;
             z-index: 100;
             display: none;
-            pointer-events: none; /* EL DEDO PASA A TRAVÉS */
         }
 
-        #burn-overlay {
+        .capa-quemada {
             position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 0%;
-            background: linear-gradient(to bottom, rgba(0,0,0,1) 80%, rgba(0,0,0,0.7) 100%);
+            bottom: 0; left: 0; width: 100%;
+            height: 0%;
+            background: #000;
             z-index: 50;
-            pointer-events: none; /* EL DEDO PASA A TRAVÉS */
         }
 
-        #start-btn {
+        /* Mensaje Final */
+        #mensaje-final {
             position: absolute;
-            z-index: 200;
-            padding: 15px 30px;
-            background: #f4e4bc;
-            border: 2px solid #2c1b18;
+            width: 80%;
+            text-align: center;
+            font-style: italic;
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: opacity 3s ease-in-out;
+            z-index: 2000;
+            color: rgba(244, 228, 188, 0.7);
+            line-height: 1.6;
+        }
+
+        #btn-play {
+            position: absolute;
+            z-index: 1000;
+            padding: 15px 40px;
+            background: none;
+            border: 1px solid #f4e4bc;
+            color: #f4e4bc;
             font-size: 1.1rem;
-            font-weight: bold;
-            color: #2c1b18;
+            letter-spacing: 3px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <button id="start-btn" onclick="startBurning()">LEER CARTA</button>
+    <canvas id="canvas"></canvas>
+    <button id="btn-play" onclick="empezarExperiencia()">LEER</button>
+    <div id="mensaje-final">No entres en pánico, esto solo lo puedes ver tú.</div>
 
-    <div id="main-container">
-        <div id="fire-line"></div>
-        <div id="burn-overlay"></div>
-        <div class="paper" id="scroll-area">
+    <div class="contenedor-premium" id="carta">
+        <div id="scroll-content">
             <p>
-                Se que la cague y es la parte mas dificil, la de no poder echarle la culpa a nadie más que a mi mismo, tuve algo real en mis manos algo que no se encuentra facil y lo rompi y no era porque no te quisiera sino porque no supe manejar lo que me pasaba por dentro, el miedo la inseguridad… ese enfado que a veces tenia y ni siquiera entendia de donde venia, lo peor es que tu eras justo lo que necesitaba tu forma de ver la vida tu calma tu humor esa manera tuya de hacer que todo fuera mas sencillo sin darte cuenta, contigo me sentia bien… aunque muchas veces fui incapaz de demostartelo o de cuidarlo como debia. No siempre el amor es suficiente cuando uno no esta bien consigo mismo y yo no lo estaba… y la verdad es que todavia estoy intentando estarlo. Hoy me pesa saber que eras mi lugar seguro y que fui yo quien lo quemo y duele de una forma que no se ni como explicar bien, saber que eras todo lo que queria y aun asi convertirme en mi propio peor enemigo.
+                Se que la cague y es la parte mas dificil, la de no poder echarle la culpa a nadie más que a mi mismo, tuve algo real en mis manos algo que no se encuentra facil y lo rompi y no era porque no te quisiera sino porque no supe manejar lo que me pasaba por dentro, el miedo la inseguridad… ese enfado que a veces tenia y ni siquiera entendia de donde venia, lo peor es que tu eras justo lo que necesitaba tu forma de ver la vida tu calma tu humor esa manera tuya de hacer que todo fuera mas sencillo sin darte cuenta, contigo me sentia bien… aunque muchas veces fui incapaz de demostartelo o de cuidarlo como debia. <br><br>
+                No siempre el amor es suficiente cuando uno no esta bien consigo mismo y yo no lo estaba… y la verdad es que todavia estoy intentando estarlo. Hoy me pesa saber que eras mi lugar seguro y que fui yo quien lo quemo y duele de una forma que no se ni como explicar bien, saber que eras todo lo que queria y aun asi convertirme en mi propio peor enemigo.
             </p>
         </div>
+        <div class="fuego-linea" id="fuego"></div>
+        <div class="capa-quemada" id="overlay"></div>
     </div>
 
     <script>
-        function startBurning() {
-            const btn = document.getElementById('start-btn');
-            const fire = document.getElementById('fire-line');
-            const overlay = document.getElementById('burn-overlay');
-            const duration = 60000; // 1 minuto para leer
+        function empezarExperiencia() {
+            const btn = document.getElementById('btn-play');
+            const scrollContent = document.getElementById('scroll-content');
+            const fuego = document.getElementById('fuego');
+            const overlay = document.getElementById('overlay');
+            const carta = document.getElementById('carta');
+            const final = document.getElementById('mensaje-final');
             
             btn.style.display = 'none';
-            fire.style.display = 'block';
+            fuego.style.display = 'block';
 
+            const duracionScroll = 50000; // 50 seg para el texto
+            const distanciaScroll = scrollContent.offsetHeight;
             let start = null;
 
-            function animate(timestamp) {
+            function animar(timestamp) {
                 if (!start) start = timestamp;
-                let progress = timestamp - start;
-                let percent = Math.min((progress / duration) * 100, 100);
+                let progreso = timestamp - start;
+                let porcentaje = Math.min(progreso / duracionScroll, 1);
 
-                fire.style.top = percent + "%";
-                overlay.style.height = percent + "%";
+                // El texto sube solo
+                scrollContent.style.transform = `translateY(-${porcentaje * (distanciaScroll + 50)}px)`;
 
-                if (progress < duration) {
-                    requestAnimationFrame(animate);
+                // Iniciar quemado total al final del scroll
+                if (porcentaje > 0.9) {
+                    overlay.style.height = ((porcentaje - 0.9) * 1000) + "%";
+                }
+
+                if (progreso < duracionScroll + 2000) {
+                    requestAnimationFrame(animar);
+                } else {
+                    carta.style.opacity = "0";
+                    setTimeout(() => {
+                        final.style.opacity = "1";
+                    }, 2000);
                 }
             }
-
-            requestAnimationFrame(animate);
+            requestAnimationFrame(animar);
         }
+
+        // Sistema de cenizas de fondo
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        let particles = [];
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+            if (particles.length < 40) particles.push({x: Math.random()*canvas.width, y: canvas.height, v: Math.random()*2+0.5, s: Math.random()*2});
+            particles.forEach((p, i) => {
+                p.y -= p.v;
+                ctx.fillRect(p.x, p.y, p.s, p.s);
+                if (p.y < -10) particles[i] = {x: Math.random()*canvas.width, y: canvas.height, v: Math.random()*2+0.5, s: Math.random()*2};
+            });
+            requestAnimationFrame(draw);
+        }
+        draw();
     </script>
 </body>
 </html>
