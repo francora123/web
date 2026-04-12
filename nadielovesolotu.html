@@ -1,48 +1,75 @@
+Aquí tienes la versión pulida. He añadido un efecto de **"partículas de ceniza"** que siguen el dedo y he mejorado el sistema de escritura para que el texto sea legible (con scroll automático) mientras la persona mantiene presionado.
+```html
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Para ti</title>
 <style>
-    body { margin: 0; background: #000; overflow: hidden; font-family: 'Georgia', serif; color: #f4e4bc; }
-    #game-container { position: relative; width: 100vw; height: 100dvh; display: flex; justify-content: center; align-items: center; }
+    body { margin: 0; background: #050505; overflow: hidden; font-family: 'Georgia', serif; color: #f4e4bc; }
     
-    /* El texto oculto tras el humo */
+    #game-container { 
+        position: relative; 
+        width: 100vw; 
+        height: 100dvh; 
+        display: flex; 
+        flex-direction: column;
+        justify-content: center; 
+        align-items: center; 
+    }
+    
     #texto-carta {
-        width: 80%;
+        width: 85%;
+        max-height: 60vh;
         text-align: center;
         line-height: 1.8;
-        font-size: 1.2rem;
-        opacity: 0.1;
-        transition: opacity 0.5s;
+        font-size: 1.1rem;
+        opacity: 0;
+        transition: opacity 0.4s;
         z-index: 1;
+        overflow-y: hidden;
+        white-space: pre-line;
     }
 
-    /* Capa de humo/oscuridad */
     #overlay {
         position: absolute;
         inset: 0;
-        background: radial-gradient(circle at var(--x) var(--y), transparent 10%, rgba(0,0,0,0.95) 25%);
+        /* Efecto linterna */
+        background: radial-gradient(circle at var(--x) var(--y), transparent 8%, rgba(0,0,0,0.92) 20%);
         z-index: 2;
         pointer-events: none;
     }
 
     #instrucciones {
         position: fixed;
-        top: 20px;
+        bottom: 10%;
         width: 100%;
         text-align: center;
         font-style: italic;
-        color: #888;
+        color: #666;
         z-index: 3;
+        font-size: 0.9rem;
+        transition: opacity 0.5s;
     }
 
     .active #texto-carta { opacity: 1; }
+    .active #instrucciones { opacity: 0; }
+
+    .ceniza {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: rgba(255,255,255,0.3);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 4;
+    }
 </style>
 </head>
 <body>
 
-<div id="instrucciones">Mantén presionado para ver el mensaje y disipar el humo...</div>
+<div id="instrucciones">Mantén presionado para disipar las cenizas y leer...</div>
 
 <div id="game-container">
     <div id="texto-carta"></div>
@@ -50,40 +77,58 @@
 </div>
 
 <script>
-const carta = "Sé que la cagué... [Tu mensaje completo aquí] ...fui yo quien lo quemó.";
+const carta = `Se que la cague y es la parte mas dificil, la de no poder echarle la culpa a nadie más que a mi mismo. Tuve algo real en mis manos y lo rompi. No era porque no te quisiera, sino porque no supe manejar lo que me pasaba por dentro... el miedo, la inseguridad.
+
+Fuiste mi lugar seguro y fui yo quien lo quemo. Me duele saber que eras todo lo que queria y aun asi me converti en mi propio enemigo.`;
+
 const contenedor = document.getElementById('texto-carta');
 const overlay = document.getElementById('overlay');
-const body = document.body;
 let index = 0;
 let isPressing = false;
 
-// Actualizar posición del "foco"
+function createCeniza(x, y) {
+    const c = document.createElement('div');
+    c.className = 'ceniza';
+    c.style.left = x + 'px';
+    c.style.top = y + 'px';
+    document.body.appendChild(c);
+    
+    const anim = c.animate([
+        { transform: 'translate(0,0) scale(1)', opacity: 0.8 },
+        { transform: `translate(${(Math.random()-0.5)*100}px, -100px) scale(0)`, opacity: 0 }
+    ], { duration: 1500, easing: 'ease-out' });
+    
+    anim.onfinish = () => c.remove();
+}
+
 const updateSpotlight = (e) => {
-    const x = e.touches ? e.touches[0].clientX : e.clientX;
-    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    const x = (e.touches ? e.touches[0].clientX : e.clientX);
+    const y = (e.touches ? e.touches[0].clientY : e.clientY);
     overlay.style.setProperty('--x', `${x}px`);
     overlay.style.setProperty('--y', `${y}px`);
+    if(isPressing) createCeniza(x, y);
 };
 
-// Escribir mientras presiona
 function type() {
     if (isPressing && index < carta.length) {
         contenedor.innerHTML += carta[index];
         index++;
+        // Scroll automático hacia abajo
+        contenedor.scrollTop = contenedor.scrollHeight;
         setTimeout(type, 50);
     }
 }
 
 const start = (e) => {
     isPressing = true;
-    body.classList.add('active');
+    document.body.classList.add('active');
     updateSpotlight(e);
     type();
 };
 
 const stop = () => {
     isPressing = false;
-    body.classList.remove('active');
+    document.body.classList.remove('active');
 };
 
 window.addEventListener('mousedown', start);
@@ -92,7 +137,8 @@ window.addEventListener('mouseup', stop);
 window.addEventListener('touchend', stop);
 window.addEventListener('mousemove', updateSpotlight);
 window.addEventListener('touchmove', updateSpotlight);
-
 </script>
 </body>
 </html>
+
+```
