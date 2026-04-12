@@ -1,140 +1,111 @@
 <!DOCTYPE html>
 <html lang="es">
-<head> 
+<head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Para ti...</title>
     <style>
         body {
-            background: #050505;
+            background: #000;
             display: flex; justify-content: center; align-items: center;
             height: 100vh; margin: 0; overflow: hidden;
             font-family: 'Georgia', serif;
         }
 
-        .carta-wrapper { position: relative; width: 90%; max-width: 500px; }
-
+        /* El papel que se consume */
         .carta {
             background: #f4e4bc;
+            width: 90%; max-width: 450px;
             padding: 40px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
             position: relative;
-            z-index: 2;
-            transition: all 1s;
-            overflow: hidden;
+            box-shadow: 0 0 50px rgba(255, 69, 0, 0.2);
+            /* Animación principal: se quema en 30s */
+            animation: quemadoTotal 30s forwards linear;
+            transform-origin: center;
         }
 
-        p { color: #3e2723; line-height: 1.6; font-size: 1.1rem; text-align: justify; margin: 0; }
-
-        /* --- ANIMACIÓN DE QUEMADO --- */
-        .burning {
-            animation: shake 0.2s infinite, carbonize 30s forwards;
-            border: 2px solid transparent;
+        p { 
+            color: #3e2723; line-height: 1.7; font-size: 1.1rem; 
+            transition: opacity 25s linear;
         }
 
-        @keyframes shake {
-            0% { transform: translate(1px, 1px) rotate(0deg); }
-            50% { transform: translate(-1px, -2px) rotate(-1deg); }
-            100% { transform: translate(1px, -1px) rotate(1deg); }
+        /* Efecto de fuego en los bordes */
+        .carta::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            box-shadow: inset 0 0 0px #000;
+            animation: bordesQuemados 30s forwards linear;
+            pointer-events: none;
         }
 
-        @keyframes carbonize {
-            0% { background: #f4e4bc; }
-            80% { background: #222; filter: contrast(1.5) brightness(0.5); }
-            100% { background: #000; opacity: 0; transform: scale(0.8) translateY(-50px); filter: blur(10px); }
+        /* Las llamas */
+        .fuego {
+            position: absolute;
+            bottom: -10px; left: 0; width: 100%;
+            height: 10px;
+            background: linear-gradient(transparent, #ff4500, #ff8c00, #ffee00);
+            filter: blur(8px);
+            animation: llamarada 30s forwards linear;
         }
 
-        /* --- LLAMAS --- */
-        .fire-container {
-            position: absolute; bottom: -20px; left: 0; width: 100%;
-            height: 100%; pointer-events: none; z-index: 10;
-            display: none;
+        /* ANIMACIONES */
+        @keyframes quemadoTotal {
+            0% { transform: scale(1); filter: brightness(1); }
+            50% { background: #8b4513; transform: scale(1.02) rotate(0.5deg); }
+            80% { background: #222; transform: scale(0.95) rotate(-1deg); filter: blur(2px); }
+            100% { background: #000; transform: scale(0.5); opacity: 0; filter: blur(20px); }
         }
 
-        .fire {
-            position: absolute; bottom: 0; width: 15px; height: 15px;
-            background: #ff4500; border-radius: 50%;
-            filter: blur(5px); animation: flame-up 1.5s infinite;
-            opacity: 0.8;
+        @keyframes bordesQuemados {
+            0% { box-shadow: inset 0 0 0px #000; }
+            50% { box-shadow: inset 0 0 100px #000; }
+            100% { box-shadow: inset 0 0 300px #000; }
         }
 
-        @keyframes flame-up {
-            0% { transform: translateY(0) scale(1); background: #ff4500; opacity: 0.8; }
-            100% { transform: translateY(-300px) scale(3); background: #ffca28; opacity: 0; }
+        @keyframes llamarada {
+            0% { height: 10px; opacity: 0; }
+            20% { height: 50px; opacity: 1; }
+            100% { height: 600px; opacity: 0.8; bottom: 100%; }
         }
 
-        /* --- CENIZAS --- */
         .ceniza {
-            position: absolute; background: #555; width: 4px; height: 4px;
-            border-radius: 50%; pointer-events: none;
-            animation: fly-away 3s forwards;
+            position: absolute; background: #fff; opacity: 0.5;
+            width: 3px; height: 3px; border-radius: 50%;
+            animation: subirCeniza 4s infinite linear;
         }
 
-        @keyframes fly-away {
-            to { transform: translateY(-600px) translateX(50px) rotate(360deg); opacity: 0; }
+        @keyframes subirCeniza {
+            0% { transform: translateY(0) rotate(0); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-800px) translateX(100px) rotate(360deg); opacity: 0; }
         }
 
-        .countdown {
-            position: fixed; top: 20px; color: #ff4500; font-size: 0.8rem;
-            letter-spacing: 2px; text-transform: uppercase;
-        }
     </style>
 </head>
 <body>
 
-    <div class="countdown" id="timer">La verdad se consume en 30s...</div>
-
-    <div class="carta-wrapper">
-        <div class="carta" id="carta">
-            <p>Se que la cague y es la parte mas dificil, la de no poder echarle la culpa a nadie más que a mi mismo, tuve algo real en mis manos algo que no se encuentra facil y lo rompi y no era porque no te quisiera sino porque no supe manejar lo que me pasaba por dentro, el miedo la inseguridad… ese enfado que a veces tenia y ni siquiera entendia de donde venia, lo peor es que tu eras justo lo que necesitaba tu forma de ver la vida tu calma tu humor esa manera tuya de hacer que todo fuera mas sencillo sin darte cuenta, contigo me sentia bien… aunque muchas veces fui incapaz de demostartelo o de cuidarlo como debia. No siempre el amor es suficiente cuando uno no esta bien consigo mismo y yo no lo estaba… y la verdad es que todavia estoy intentando estarlo. Hoy me pesa saber que eras mi lugar seguro y que fui yo quien lo quemo y duele de una forma que no se ni como explicar bien, saber que eras todo lo que queria y aun asi convertirme en mi propio peor enemigo.</p>
-        </div>
-        <div class="fire-container" id="fire"></div>
+    <div class="carta">
+        <div class="fuego"></div>
+        <p id="texto">
+            Se que la cague y es la parte mas dificil, la de no poder echarle la culpa a nadie más que a mi mismo, tuve algo real en mis manos algo que no se encuentra facil y lo rompi y no era porque no te quisiera sino porque no supe manejar lo que me pasaba por dentro, el miedo la inseguridad… ese enfado que a veces tenia y ni siquiera entendia de donde venia, lo peor es que tu eras justo lo que necesitaba tu forma de ver la vida tu calma tu humor esa manera tuya de hacer que todo fuera mas sencillo sin darte cuenta, contigo me sentia bien… aunque muchas veces fui incapaz de demostartelo o de cuidarlo como debia. No siempre el amor es suficiente cuando uno no esta bien consigo mismo y yo no lo estaba… y la verdad es que todavia estoy intentando estarlo. Hoy me pesa saber que eras mi lugar seguro y que fui yo quien lo quemo y duele de una forma que no se ni como explicar bien, saber que eras todo lo que queria y aun asi convertirme en mi propio peor enemigo.
+        </p>
     </div>
 
     <script>
-        const carta = document.getElementById('carta');
-        const fireContainer = document.getElementById('fire');
-        const timerText = document.getElementById('timer');
-        let timeLeft = 30;
+        // Crear partículas de ceniza automáticamente
+        setInterval(() => {
+            const ceniza = document.createElement('div');
+            ceniza.className = 'ceniza';
+            ceniza.style.left = Math.random() * 100 + 'vw';
+            ceniza.style.bottom = '0';
+            ceniza.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            document.body.appendChild(ceniza);
+            setTimeout(() => ceniza.remove(), 4000);
+        }, 100);
 
-        // Iniciar cuenta regresiva
-        const interval = setInterval(() => {
-            timeLeft--;
-            timerText.innerText = `La verdad se consume en ${timeLeft}s...`;
-            
-            // Empezar a mostrar fuego y vibración gradualmente
-            if (timeLeft <= 25) {
-                fireContainer.style.display = 'block';
-                crearLlama();
-                crearCeniza();
-            }
-
-            if (timeLeft <= 0) {
-                clearInterval(interval);
-                carta.classList.add('burning');
-                timerText.innerText = "Hecho cenizas.";
-            }
-        }, 1000);
-
-        function crearLlama() {
-            for(let i=0; i<5; i++) {
-                const f = document.createElement('div');
-                f.className = 'fire';
-                f.style.left = Math.random() * 100 + '%';
-                f.style.animationDelay = Math.random() + 's';
-                fireContainer.appendChild(f);
-                setTimeout(() => f.remove(), 1500);
-            }
-        }
-
-        function crearCeniza() {
-            const c = document.createElement('div');
-            c.className = 'ceniza';
-            c.style.left = Math.random() * 100 + 'vw';
-            c.style.top = '100vh';
-            document.body.appendChild(c);
-            setTimeout(() => c.remove(), 3000);
-        }
+        // Hacer que el texto desaparezca lentamente antes que el papel
+        setTimeout(() => {
+            document.getElementById('texto').style.opacity = "0";
+        }, 5000);
     </script>
 </body>
 </html>
