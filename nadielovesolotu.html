@@ -6,138 +6,137 @@
     <title>Para ti</title>
     <style>
         body {
-            background-color: #050505;
+            background-color: #020202;
             margin: 0; padding: 0;
             display: flex; justify-content: center; align-items: center;
             height: 100vh; overflow: hidden;
-            font-family: 'Times New Roman', serif;
+            font-family: 'Georgia', serif;
         }
 
-        /* Contenedor de la carta */
-        .paper {
+        /* Contenedor principal */
+        .wrapper {
             position: relative;
             width: 85%;
             max-width: 400px;
+            perspective: 1000px;
+        }
+
+        .paper {
+            position: relative;
             background: #f4e4bc;
-            padding: 30px;
-            box-shadow: 0 0 20px rgba(0,0,0,1);
+            padding: 35px;
+            box-shadow: 0 0 50px rgba(0,0,0,1);
             color: #2c1b18;
-            animation: burnPaper 30s forwards linear;
-            transform-origin: center;
+            /* La magia del quemado irregular */
+            mask-image: linear-gradient(to bottom, transparent 0%, black 15%);
+            -webkit-mask-image: linear-gradient(to bottom, transparent var(--burn), black calc(var(--burn) + 15%));
+            --burn: -20%;
+            animation: burnSequence 60s forwards linear;
+            z-index: 1;
         }
 
-        /* Efecto de borde quemado real */
-        .paper::after {
+        /* Borde incandescente (Brasas) */
+        .paper::before {
             content: '';
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            box-shadow: inset 0 0 0px #000;
-            animation: burnEdges 30s forwards linear;
+            position: absolute;
+            top: calc(var(--burn) - 2%);
+            left: 0; width: 100%; height: 5px;
+            background: #ff4500;
+            box-shadow: 0 0 15px 5px #ff4500, 0 0 30px 10px #ff8c00;
+            filter: blur(2px);
+            z-index: 10;
+            animation: embersMove 60s forwards linear;
         }
 
-        h2 { text-align: center; font-size: 1.2rem; margin-bottom: 15px; color: #5d4037; }
-        
         p { 
             font-size: 1.05rem; line-height: 1.6; margin: 0;
             text-align: justify;
-            animation: fadeText 25s forwards linear;
+            animation: heatDistortion 2s infinite alternate ease-in-out;
         }
 
-        /* LLAMAS REALISTAS */
-        .fire-overlay {
+        /* ANIMACIONES MEJORADAS */
+        @keyframes burnSequence {
+            0% { --burn: -20%; background: #f4e4bc; transform: rotateX(0deg); }
+            50% { background: #d2b48c; }
+            80% { background: #3d2b1f; }
+            100% { --burn: 100%; background: #000; opacity: 0; transform: rotateX(10deg) scale(0.9); }
+        }
+
+        @keyframes embersMove {
+            0% { top: -5%; opacity: 0; }
+            5% { opacity: 1; }
+            100% { top: 100%; opacity: 1; }
+        }
+
+        @keyframes heatDistortion {
+            0% { transform: skew(0deg); filter: blur(0px); }
+            100% { transform: skew(0.5deg); filter: blur(0.3px); }
+        }
+
+        /* Llamas dinámicas en el borde */
+        .fire-line {
             position: absolute;
-            bottom: -20px; left: 0; width: 100%; height: 100%;
+            top: var(--burn);
+            left: 0; width: 100%;
             pointer-events: none;
-            z-index: 10;
+            z-index: 11;
+            animation: embersMove 60s forwards linear;
         }
 
         .flame {
-            position: absolute; bottom: 0;
-            width: 20px; height: 20px;
-            background: rgba(255, 69, 0, 0.9);
-            border-radius: 50% 50% 20% 20%;
-            filter: blur(10px);
-            animation: moveUp 2s infinite ease-in;
+            position: absolute;
+            width: 15px; height: 15px;
+            background: #ff4500;
+            border-radius: 50%;
+            filter: blur(8px);
+            animation: flameUp 1s infinite;
             mix-blend-mode: screen;
         }
 
-        /* ANIMACIONES */
-        @keyframes burnPaper {
-            0% { transform: scale(1) rotate(0deg); }
-            30% { background: #e6d5ac; }
-            60% { background: #8b5a2b; transform: scale(1.05) rotate(0.5deg); }
-            85% { background: #222; filter: brightness(0.5); opacity: 1; }
-            100% { transform: scale(0.7) translateY(-100px); opacity: 0; filter: blur(40px); }
-        }
-
-        @keyframes burnEdges {
-            0% { box-shadow: inset 0 0 0px #000; }
-            50% { box-shadow: inset 0 0 50px #ff4500, inset 0 0 100px #000; }
-            100% { box-shadow: inset 0 0 200px #000; }
-        }
-
-        @keyframes fadeText {
-            0% { opacity: 1; }
-            70% { opacity: 1; filter: none; }
-            90% { opacity: 0; filter: blur(2px); }
-            100% { opacity: 0; }
-        }
-
-        @keyframes moveUp {
-            0% { transform: translateY(0) scale(1); opacity: 1; background: #ff4500; }
-            100% { transform: translateY(-400px) scale(4); opacity: 0; background: #ff8c00; }
-        }
-
-        /* Cenizas volando */
-        .ash {
-            position: absolute;
-            background: rgba(255,255,255,0.4);
-            border-radius: 50%;
-            pointer-events: none;
-            animation: ashFly 4s linear forwards;
-        }
-
-        @keyframes ashFly {
-            to { transform: translateY(-100vh) translateX(50px) rotate(360deg); opacity: 0; }
+        @keyframes flameUp {
+            0% { transform: translateY(0) scale(1); opacity: 0.8; }
+            100% { transform: translateY(-30px) scale(2); opacity: 0; }
         }
     </style>
 </head>
 <body>
 
-    <div class="paper">
-        <h2>Para ti...</h2>
-        <p>
-            Se que la cague y es la parte mas dificil, la de no poder echarle la culpa a nadie más que a mi mismo, tuve algo real en mis manos algo que no se encuentra facil y lo rompi y no era porque no te quisiera sino porque no supe manejar lo que me pasaba por dentro, el miedo la inseguridad… ese enfado que a veces tenia y ni siquiera entendia de donde venia, lo peor es que tu eras justo lo que necesitaba tu forma de ver la vida tu calma tu humor esa manera tuya de hacer que todo fuera mas sencillo sin darte cuenta, contigo me sentia bien… aunque muchas veces fui incapaz de demostartelo o de cuidarlo como debia. No siempre el amor es suficiente cuando uno no esta bien consigo mismo y yo no lo estaba… y la verdad es que todavia estoy intentando estarlo. Hoy me pesa saber que eras mi lugar seguro y que fui yo quien lo quemo y duele de una forma que no se ni como explicar bien, saber que eras todo lo que queria y aun asi convertirme en mi propio peor enemigo.
-        </p>
-        <div class="fire-overlay" id="fire"></div>
+    <div class="wrapper">
+        <div class="paper" id="paper">
+            <p>
+                Se que la cague y es la parte mas dificil, la de no poder echarle la culpa a nadie más que a mi mismo, tuve algo real en mis manos algo que no se encuentra facil y lo rompi y no era porque no te quisiera sino porque no supe manejar lo que me pasaba por dentro, el miedo la inseguridad… ese enfado que a veces tenia y ni siquiera entendia de donde venia, lo peor es que tu eras justo lo que necesitaba tu forma de ver la vida tu calma tu humor esa manera tuya de hacer que todo fuera mas sencillo sin darte cuenta, contigo me sentia bien… aunque muchas veces fui incapaz de demostartelo o de cuidarlo como debia. No siempre el amor es suficiente cuando uno no esta bien consigo mismo y yo no lo estaba… y la verdad es que todavia estoy intentando estarlo. Hoy me pesa saber que eras mi lugar seguro y que fui yo quien lo quemo y duele de una forma que no se ni como explicar bien, saber que eras todo lo que queria y aun asi convertirme en mi propio peor enemigo.
+            </p>
+            <div class="fire-line" id="fireLine"></div>
+        </div>
     </div>
 
     <script>
-        const fireContainer = document.getElementById('fire');
-
-        // Crea llamas de forma continua
-        function createFlame() {
-            const flame = document.createElement('div');
-            flame.className = 'flame';
-            flame.style.left = Math.random() * 100 + '%';
-            flame.style.width = (Math.random() * 30 + 10) + 'px';
-            flame.style.animationDuration = (Math.random() * 1 + 1) + 's';
-            fireContainer.appendChild(flame);
-            setTimeout(() => flame.remove(), 2000);
+        // Inyectar llamas en la línea de fuego
+        const line = document.getElementById('fireLine');
+        function addFlame() {
+            const f = document.createElement('div');
+            f.className = 'flame';
+            f.style.left = Math.random() * 100 + '%';
+            line.appendChild(f);
+            setTimeout(() => f.remove(), 1000);
         }
+        setInterval(addFlame, 100);
 
-        // Crea cenizas de forma continua
-        function createAsh() {
-            const ash = document.createElement('div');
-            ash.className = 'ash';
-            ash.style.width = ash.style.height = (Math.random() * 4 + 1) + 'px';
-            ash.style.left = Math.random() * 100 + 'vw';
-            ash.style.bottom = '-10px';
-            document.body.appendChild(ash);
-            setTimeout(() => ash.remove(), 4000);
+        // Actualizar la variable de CSS para la máscara (para navegadores que no animan variables CSS nativamente)
+        let burnVal = -20;
+        const paper = document.getElementById('paper');
+        const startTime = Date.now();
+        const duration = 60000;
+
+        function updateBurn() {
+            const elapsed = Date.now() - startTime;
+            const progress = elapsed / duration;
+            burnVal = -20 + (120 * progress);
+            paper.style.setProperty('--burn', burnVal + '%');
+            
+            if (progress < 1) requestAnimationFrame(updateBurn);
         }
-
-        setInterval(createFlame, 100);
-        setInterval(createAsh, 200);
+        updateBurn();
     </script>
 </body>
 </html>
