@@ -29,7 +29,7 @@
         line-height:1.75;
         white-space:pre-line;
         transform: translateY(0);
-        transition: transform 0.1s linear;
+        transition: transform 0.2s linear; /* Suaviza el movimiento al subir */
     }
 
     /* FUEGO */
@@ -39,7 +39,7 @@
         width:100%;
         height:16px;
         background:linear-gradient(to top,#ff3b00,#ff9a00,transparent);
-        box-shadow:0 -10px 30px #ff3b00,0 -25px 70px #ff0000;
+        box-shadow:0 -10px 30px #ff3b00, 0 -25px 70px #ff0000;
         z-index: 10;
     }
 
@@ -108,13 +108,14 @@ function type(){
         textoEl.innerHTML += text[i];
         i++;
 
-        // Scroll automático suave
-        const offset = Math.max(0, textoEl.offsetHeight - 250);
+        // Calcula el scroll para que siempre se vea lo último que se escribe
+        // Si el texto supera los 200px de altura, empieza a subir
+        const offset = Math.max(0, textoEl.scrollHeight - 200);
         textoEl.style.transform = `translateY(-${offset}px)`;
 
-        setTimeout(type, 35);
+        setTimeout(type, 45); // Velocidad de escritura
     }else{
-        setTimeout(finish, 1000);
+        setTimeout(finish, 1500);
     }
 }
 
@@ -122,12 +123,13 @@ function finish(){
     document.getElementById("final").style.animation = "showFinal 3s forwards";
     document.getElementById("final").style.bottom = "10%";
 
-    document.querySelector(".carbon").style.transition="2.5s ease-in";
+    document.querySelector(".carbon").style.transition="3s ease-in";
     document.querySelector(".carbon").style.transform="translateY(0%)";
 
     if(navigator.vibrate) navigator.vibrate([200,100,500]);
 }
 
+// Generador de cenizas ambiente
 for(let j=0; j<35; j++){
     const c = document.createElement("div");
     c.className = "ceniza";
