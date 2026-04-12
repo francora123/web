@@ -1,141 +1,145 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Para ti</title>
-    <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        body {
-            background-color: #000;
-            margin: 0; padding: 0;
-            height: 100dvh; width: 100vw;
-            display: flex; justify-content: center; align-items: center;
-            font-family: 'Georgia', serif;
-            overflow: hidden; /* Bloquea cualquier scroll accidental del sistema */
-        }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Para ti</title>
 
-        /* Contenedor adaptado a la proporción del móvil */
-        .viewport-movil {
-            position: relative;
-            width: 88vw;
-            height: 75dvh;
-            background: #f4e4bc;
-            box-shadow: 0 0 50px rgba(0,0,0,1);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
+<style>
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-        /* Animación de desplazamiento del texto */
-        #texto-animado {
-            position: relative;
-            padding: 40px 25px;
-            will-change: transform;
-            /* El texto sube solo en 50 segundos */
-            animation: scrollAutomatico 50s linear forwards;
-        }
+body{
+    margin:0;
+    height:100dvh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#000;
+    overflow:hidden;
+    font-family: Georgia, serif;
+}
 
-        p {
-            font-size: 1.1rem;
-            line-height: 1.75;
-            color: #2c1b18;
-            margin: 0;
-            text-align: left;
-        }
+/* CONTENEDOR */
+.viewport{
+    position:relative;
+    width:88vw;
+    height:78dvh;
+    background:#f4e4bc;
+    overflow:hidden;
+    box-shadow:0 0 60px rgba(0,0,0,.9);
+}
 
-        /* Efecto de quemado dinámico en la base */
-        .fuego-base {
-            position: absolute;
-            bottom: 0; left: 0; width: 100%;
-            height: 10px;
-            background: linear-gradient(to top, #ff4500, #ff8c00, transparent);
-            box-shadow: 0 -15px 30px #ff4500, 0 -25px 50px #ff0000;
-            z-index: 100;
-        }
+/* TEXTO */
+#texto{
+    position:absolute;
+    top:100%;
+    width:100%;
+    padding:40px 26px;
+    color:#2c1b18;
+    font-size:1.1rem;
+    line-height:1.75;
+    animation: subir 55s linear forwards;
+}
 
-        .carbonizado {
-            position: absolute;
-            bottom: 0; left: 0; width: 100%;
-            height: 100%;
-            background: #000;
-            z-index: 50;
-            transform: translateY(100%);
-            /* La capa negra sube junto con el final del texto */
-            animation: subirCarbon 50s linear forwards;
-        }
+@keyframes subir{
+    0%{ transform:translateY(0); opacity:1; }
+    85%{ opacity:1; }
+    100%{ transform:translateY(-120%); opacity:0.15; }
+}
 
-        /* Mensaje final oculto */
-        #final {
-            position: fixed;
-            width: 80%;
-            text-align: center;
-            font-style: italic;
-            font-size: 1.1rem;
-            color: rgba(244, 228, 188, 0.7);
-            opacity: 0;
-            animation: mostrarFinal 3s forwards 51s; /* Aparece después de quemarse */
-            z-index: 1000;
-        }
+/* FUEGO */
+.fuego{
+    position:absolute;
+    bottom:0;
+    width:100%;
+    height:14px;
+    background:linear-gradient(to top,#ff3b00,#ff9a00,transparent);
+    box-shadow:0 -10px 25px #ff3b00,0 -20px 60px #ff0000;
+}
 
-        /* ANIMACIONES */
-        @keyframes scrollAutomatico {
-            0% { transform: translateY(0); }
-            90% { opacity: 1; }
-            100% { transform: translateY(-110%); opacity: 0; }
-        }
+/* CARBÓN */
+.carbon{
+    position:absolute;
+    bottom:0;
+    width:100%;
+    height:100%;
+    background:#000;
+    transform:translateY(100%);
+    animation: quemado 55s linear forwards;
+}
 
-        @keyframes subirCarbon {
-            0% { transform: translateY(100%); }
-            90% { transform: translateY(100%); } /* Se queda abajo hasta el final */
-            100% { transform: translateY(0%); }
-        }
+@keyframes quemado{
+    0%,85%{ transform:translateY(100%); }
+    100%{ transform:translateY(0%); }
+}
 
-        @keyframes mostrarFinal {
-            to { opacity: 1; }
-        }
+/* FINAL */
+#final{
+    position:fixed;
+    width:85%;
+    text-align:center;
+    color:rgba(244,228,188,0.75);
+    font-style:italic;
+    font-size:1.1rem;
+    opacity:0;
+    animation: show 3s ease forwards;
+    animation-delay:56s;
+}
 
-        /* Partículas de ceniza sutiles */
-        .ceniza {
-            position: absolute;
-            background: #fff;
-            width: 2px; height: 2px;
-            opacity: 0.3;
-            animation: cenizaVuelo 4s infinite linear;
-        }
+@keyframes show{
+    to{ opacity:1; }
+}
 
-        @keyframes cenizaVuelo {
-            0% { transform: translateY(100vh); opacity: 0; }
-            50% { opacity: 0.4; }
-            100% { transform: translateY(-10vh) translateX(20px); opacity: 0; }
-        }
-    </style>
+/* CENIZAS */
+.ceniza{
+    position:absolute;
+    background:#fff;
+    border-radius:50%;
+    opacity:0.25;
+    animation: caer linear infinite;
+}
+
+@keyframes caer{
+    0%{ transform:translateY(100vh); opacity:0; }
+    20%{ opacity:.3; }
+    100%{ transform:translateY(-20vh) translateX(30px); opacity:0; }
+}
+</style>
 </head>
+
 <body>
 
-    <div id="final">No entres en pánico, esto solo lo puedes ver tú.</div>
+<div id="final">No entres en pánico… esto solo lo puedes ver tú.</div>
 
-    <div class="viewport-movil">
-        <div id="texto-animado">
-            <p>
-                Se que la cague y es la parte mas dificil, la de no poder echarle la culpa a nadie más que a mi mismo, tuve algo real en mis manos algo que no se encuentra facil y lo rompi y no era porque no te quisiera sino porque no supe manejar lo que me pasaba por dentro, el miedo la inseguridad… ese enfado que a veces tenia y ni siquiera entendia de donde venia, lo peor es que tu eras justo lo que necesitaba tu forma de ver la vida tu calma tu humor esa manera tuya de hacer que todo fuera mas sencillo sin darte cuenta, contigo me sentia bien… aunque muchas veces fui incapaz de demostartelo o de cuidarlo como debia. <br><br>
-                No siempre el amor es suficiente cuando uno no esta bien consigo mismo y yo no lo estaba… y la verdad es que todavia estoy intentando estarlo. Hoy me pesa saber que eras mi lugar seguro y que fui yo quien lo quemo y duele de una forma que no se ni como explicar bien, saber que eras todo lo que queria y aun asi convertirme en mi propio peor enemigo.
-            </p>
-        </div>
-        <div class="fuego-base"></div>
-        <div class="carbonizado"></div>
+<div class="viewport">
+
+    <div id="texto">
+        Se que la cague y es la parte mas dificil, la de no poder echarle la culpa a nadie más que a mi mismo, tuve algo real en mis manos algo que no se encuentra facil y lo rompi y no era porque no te quisiera sino porque no supe manejar lo que me pasaba por dentro, el miedo la inseguridad… ese enfado que a veces tenia y ni siquiera entendia de donde venia, lo peor es que tu eras justo lo que necesitaba tu forma de ver la vida tu calma tu humor esa manera tuya de hacer que todo fuera mas sencillo sin darte cuenta, contigo me sentia bien… aunque muchas veces fui incapaz de demostartelo o de cuidarlo como debia. <br><br>
+
+        No siempre el amor es suficiente cuando uno no esta bien consigo mismo y yo no lo estaba… y la verdad es que todavia estoy intentando estarlo. Hoy me pesa saber que eras mi lugar seguro y que fui yo quien lo quemo y duele de una forma que no se ni como explicar bien, saber que eras todo lo que queria y aun asi convertirme en mi propio peor enemigo.
     </div>
 
-    <script>
-        // Crear algunas cenizas de fondo al cargar
-        for (let i = 0; i < 20; i++) {
-            let c = document.createElement('div');
-            c.className = 'ceniza';
-            c.style.left = Math.random() * 100 + 'vw';
-            c.style.animationDelay = Math.random() * 4 + 's';
-            document.body.appendChild(c);
-        }
-    </script>
+    <div class="fuego"></div>
+    <div class="carbon"></div>
+</div>
+
+<script>
+// CENIZAS PRO
+for(let i=0;i<35;i++){
+    const c=document.createElement("div");
+    c.className="ceniza";
+
+    const size = Math.random()*3+1;
+    c.style.width=size+"px";
+    c.style.height=size+"px";
+
+    c.style.left=Math.random()*100+"vw";
+    c.style.animationDuration=(3+Math.random()*5)+"s";
+    c.style.animationDelay=Math.random()*5+"s";
+
+    document.body.appendChild(c);
+}
+</script>
+
 </body>
 </html>
