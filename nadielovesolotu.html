@@ -2,97 +2,143 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Para ti</title>
 <style>
-    body { margin: 0; background: #000; overflow: hidden; font-family: 'Georgia', serif; color: #f4e4bc; }
-    #game-container { position: relative; width: 100vw; height: 100dvh; display: flex; justify-content: center; align-items: center; }
-    
-    /* El texto oculto tras el humo */
-    #texto-carta {
-        width: 80%;
-        text-align: center;
-        line-height: 1.8;
-        font-size: 1.2rem;
-        opacity: 0.1;
-        transition: opacity 0.5s;
-        z-index: 1;
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    body{margin:0;height:100dvh;display:flex;justify-content:center;align-items:center;background:#000;overflow:hidden;font-family:Georgia,serif;}
+
+    /* CONTENEDOR CARTA */
+    .viewport{
+        position:relative;
+        width:88vw;
+        height:78dvh;
+        background:#f4e4bc;
+        overflow:hidden;
+        box-shadow:0 0 80px rgba(0,0,0,.9);
     }
 
-    /* Capa de humo/oscuridad */
-    #overlay {
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(circle at var(--x) var(--y), transparent 10%, rgba(0,0,0,0.95) 25%);
-        z-index: 2;
-        pointer-events: none;
+    /* TEXTO */
+    #texto{
+        position:absolute;
+        top:0;
+        width:100%;
+        padding:40px 26px;
+        color:#2c1b18;
+        font-size:1.1rem;
+        line-height:1.75;
+        white-space:pre-line;
+        transform: translateY(0);
+        transition: transform 0.1s linear;
     }
 
-    #instrucciones {
-        position: fixed;
-        top: 20px;
-        width: 100%;
-        text-align: center;
-        font-style: italic;
-        color: #888;
-        z-index: 3;
+    /* FUEGO */
+    .fuego{
+        position:absolute;
+        bottom:0;
+        width:100%;
+        height:16px;
+        background:linear-gradient(to top,#ff3b00,#ff9a00,transparent);
+        box-shadow:0 -10px 30px #ff3b00,0 -25px 70px #ff0000;
+        z-index: 10;
     }
 
-    .active #texto-carta { opacity: 1; }
+    /* CARBÓN */
+    .carbon{
+        position:absolute;
+        bottom:0;
+        width:100%;
+        height:100%;
+        background:#000;
+        transform:translateY(100%);
+        z-index: 5;
+    }
+
+    /* FINAL */
+    #final{
+        position:fixed;
+        width:85%;
+        text-align:center;
+        color:rgba(244,228,188,.8);
+        font-style:italic;
+        opacity:0;
+        z-index: 20;
+    }
+
+    @keyframes showFinal{
+        to{opacity:1;}
+    }
+
+    /* CENIZAS */
+    .ceniza{position:absolute;background:#fff;border-radius:50%;opacity:.2;animation:fall linear infinite;pointer-events:none;}
+    @keyframes fall{0%{transform:translateY(100vh);opacity:0;} 20%{opacity:.3;} 100%{transform:translateY(-20vh) translateX(40px);opacity:0;}}
+
+    /* BOTÓN INICIO */
+    #start{position:fixed;inset:0;display:flex;justify-content:center;align-items:center;background:#000;color:#f4e4bc;z-index:999;cursor:pointer;}
 </style>
 </head>
 <body>
 
-<div id="instrucciones">Mantén presionado para ver el mensaje y disipar el humo...</div>
+<div id="start">toca para leer</div>
 
-<div id="game-container">
-    <div id="texto-carta"></div>
-    <div id="overlay" style="--x: 50%; --y: 50%;"></div>
+<div class="viewport">
+    <div id="texto"></div>
+    <div class="fuego"></div>
+    <div class="carbon"></div>
 </div>
 
+<div id="final">No entres en pánico… esto solo lo puedes ver tú.</div>
+
 <script>
-const carta = "Sé que la cagué... [Tu mensaje completo aquí] ...fui yo quien lo quemó.";
-const contenedor = document.getElementById('texto-carta');
-const overlay = document.getElementById('overlay');
-const body = document.body;
-let index = 0;
-let isPressing = false;
+const text = `Se que la cague y es la parte mas dificil, la de no poder echarle la culpa a nadie más que a mi mismo, tuve algo real en mis manos algo que no se encuentra facil y lo rompi y no era porque no te quisiera sino porque no supe manejar lo que me pasaba por dentro, el miedo la inseguridad… ese enfado que a veces tenia y ni siquiera entendia de donde venia, lo peor es que tu eras justo lo que necesitaba tu forma de ver la vida tu calma tu humor esa manera tuya de hacer que todo fuera mas sencillo sin darte cuenta, contigo me sentia bien… aunque muchas veces fui incapaz de demostartelo o de cuidarlo como debia.
 
-// Actualizar posición del "foco"
-const updateSpotlight = (e) => {
-    const x = e.touches ? e.touches[0].clientX : e.clientX;
-    const y = e.touches ? e.touches[0].clientY : e.clientY;
-    overlay.style.setProperty('--x', `${x}px`);
-    overlay.style.setProperty('--y', `${y}px`);
-};
+No siempre el amor es suficiente cuando uno no esta bien consigo mismo y yo no lo estaba… y la verdad es que todavia estoy intentando estarlo. Hoy me pesa saber que eras mi lugar seguro y que fui yo quien lo quemo y duele de una forma que no se ni como explicar bien, saber que eras todo lo que queria y aun asi convertirme en mi propio peor enemigo.`;
 
-// Escribir mientras presiona
-function type() {
-    if (isPressing && index < carta.length) {
-        contenedor.innerHTML += carta[index];
-        index++;
-        setTimeout(type, 50);
+const textoEl = document.getElementById("texto");
+const startBtn = document.getElementById("start");
+let i = 0;
+
+startBtn.addEventListener('click', () => {
+    startBtn.style.display = "none";
+    type();
+});
+
+function type(){
+    if(i < text.length){
+        textoEl.innerHTML += text[i];
+        i++;
+
+        // Scroll automático suave
+        const offset = Math.max(0, textoEl.offsetHeight - 250);
+        textoEl.style.transform = `translateY(-${offset}px)`;
+
+        setTimeout(type, 35);
+    }else{
+        setTimeout(finish, 1000);
     }
 }
 
-const start = (e) => {
-    isPressing = true;
-    body.classList.add('active');
-    updateSpotlight(e);
-    type();
-};
+function finish(){
+    document.getElementById("final").style.animation = "showFinal 3s forwards";
+    document.getElementById("final").style.bottom = "10%";
 
-const stop = () => {
-    isPressing = false;
-    body.classList.remove('active');
-};
+    document.querySelector(".carbon").style.transition="2.5s ease-in";
+    document.querySelector(".carbon").style.transform="translateY(0%)";
 
-window.addEventListener('mousedown', start);
-window.addEventListener('touchstart', start);
-window.addEventListener('mouseup', stop);
-window.addEventListener('touchend', stop);
-window.addEventListener('mousemove', updateSpotlight);
-window.addEventListener('touchmove', updateSpotlight);
+    if(navigator.vibrate) navigator.vibrate([200,100,500]);
+}
 
+for(let j=0; j<35; j++){
+    const c = document.createElement("div");
+    c.className = "ceniza";
+    const s = Math.random()*3+1;
+    c.style.width = s+"px";
+    c.style.height = s+"px";
+    c.style.left = Math.random()*100+"vw";
+    c.style.animationDuration = (3+Math.random()*6)+"s";
+    c.style.animationDelay = Math.random()*5+"s";
+    document.body.appendChild(c);
+}
 </script>
 </body>
 </html>
