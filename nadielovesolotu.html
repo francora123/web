@@ -5,138 +5,131 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Para ti</title>
     <style>
+        * { box-sizing: border-box; }
         body {
-            background-color: #020202;
+            background-color: #000;
             margin: 0; padding: 0;
             display: flex; justify-content: center; align-items: center;
-            height: 100vh; overflow: hidden;
+            height: 100vh; width: 100vw;
+            overflow: hidden;
             font-family: 'Georgia', serif;
         }
 
         /* Contenedor principal */
-        .wrapper {
+        .escena {
             position: relative;
-            width: 85%;
-            max-width: 400px;
-            perspective: 1000px;
+            width: 90%;
+            max-width: 380px;
+            height: 80vh;
+            display: flex;
+            align-items: flex-start;
         }
 
-        .paper {
-            position: relative;
+        /* El papel */
+        .carta {
             background: #f4e4bc;
-            padding: 35px;
-            box-shadow: 0 0 50px rgba(0,0,0,1);
+            width: 100%;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 0 40px rgba(0,0,0,0.8);
             color: #2c1b18;
-            /* La magia del quemado irregular */
-            mask-image: linear-gradient(to bottom, transparent 0%, black 15%);
-            -webkit-mask-image: linear-gradient(to bottom, transparent var(--burn), black calc(var(--burn) + 15%));
-            --burn: -20%;
-            animation: burnSequence 60s forwards linear;
-            z-index: 1;
+            overflow: hidden;
+            /* Control de desintegración */
+            height: 100%;
+            animation: consumirPapel 60s forwards linear;
         }
 
-        /* Borde incandescente (Brasas) */
-        .paper::before {
-            content: '';
+        /* Línea de fuego y brasas */
+        .linea-fuego {
             position: absolute;
-            top: calc(var(--burn) - 2%);
-            left: 0; width: 100%; height: 5px;
+            top: 0; left: 0;
+            width: 100%; height: 4px;
             background: #ff4500;
-            box-shadow: 0 0 15px 5px #ff4500, 0 0 30px 10px #ff8c00;
-            filter: blur(2px);
+            box-shadow: 0 0 20px 5px #ff4500, 0 0 40px 10px #ff8c00;
             z-index: 10;
-            animation: embersMove 60s forwards linear;
+            animation: bajarFuego 60s forwards linear;
         }
 
-        p { 
-            font-size: 1.05rem; line-height: 1.6; margin: 0;
+        p {
+            font-size: 1.05rem;
+            line-height: 1.65;
+            margin: 0;
             text-align: justify;
-            animation: heatDistortion 2s infinite alternate ease-in-out;
+            transition: color 0.5s;
         }
 
-        /* ANIMACIONES MEJORADAS */
-        @keyframes burnSequence {
-            0% { --burn: -20%; background: #f4e4bc; transform: rotateX(0deg); }
-            50% { background: #d2b48c; }
-            80% { background: #3d2b1f; }
-            100% { --burn: 100%; background: #000; opacity: 0; transform: rotateX(10deg) scale(0.9); }
+        /* Animaciones para móvil */
+        @keyframes consumirPapel {
+            0% { clip-path: inset(0% 0% 0% 0%); background: #f4e4bc; }
+            50% { background: #c5a381; }
+            90% { opacity: 1; }
+            100% { clip-path: inset(100% 0% 0% 0%); opacity: 0; }
         }
 
-        @keyframes embersMove {
-            0% { top: -5%; opacity: 0; }
-            5% { opacity: 1; }
+        @keyframes bajarFuego {
+            0% { top: 0%; opacity: 0; }
+            2% { opacity: 1; }
             100% { top: 100%; opacity: 1; }
         }
 
-        @keyframes heatDistortion {
-            0% { transform: skew(0deg); filter: blur(0px); }
-            100% { transform: skew(0.5deg); filter: blur(0.3px); }
-        }
-
-        /* Llamas dinámicas en el borde */
-        .fire-line {
+        /* Chispas flotantes */
+        .chispa {
             position: absolute;
-            top: var(--burn);
-            left: 0; width: 100%;
-            pointer-events: none;
-            z-index: 11;
-            animation: embersMove 60s forwards linear;
-        }
-
-        .flame {
-            position: absolute;
-            width: 15px; height: 15px;
-            background: #ff4500;
+            width: 3px; height: 3px;
+            background: #ff8c00;
             border-radius: 50%;
-            filter: blur(8px);
-            animation: flameUp 1s infinite;
-            mix-blend-mode: screen;
+            pointer-events: none;
+            z-index: 20;
+            animation: volarChispa 2s forwards ease-out;
         }
 
-        @keyframes flameUp {
-            0% { transform: translateY(0) scale(1); opacity: 0.8; }
-            100% { transform: translateY(-30px) scale(2); opacity: 0; }
+        @keyframes volarChispa {
+            0% { transform: translate(0, 0); opacity: 1; }
+            100% { transform: translate(30px, -100px); opacity: 0; }
         }
     </style>
 </head>
 <body>
 
-    <div class="wrapper">
-        <div class="paper" id="paper">
-            <p>
+    <div class="escena">
+        <div class="carta" id="carta">
+            <div class="linea-fuego" id="fuego"></div>
+            <p id="texto">
                 Se que la cague y es la parte mas dificil, la de no poder echarle la culpa a nadie más que a mi mismo, tuve algo real en mis manos algo que no se encuentra facil y lo rompi y no era porque no te quisiera sino porque no supe manejar lo que me pasaba por dentro, el miedo la inseguridad… ese enfado que a veces tenia y ni siquiera entendia de donde venia, lo peor es que tu eras justo lo que necesitaba tu forma de ver la vida tu calma tu humor esa manera tuya de hacer que todo fuera mas sencillo sin darte cuenta, contigo me sentia bien… aunque muchas veces fui incapaz de demostartelo o de cuidarlo como debia. No siempre el amor es suficiente cuando uno no esta bien consigo mismo y yo no lo estaba… y la verdad es que todavia estoy intentando estarlo. Hoy me pesa saber que eras mi lugar seguro y que fui yo quien lo quemo y duele de una forma que no se ni como explicar bien, saber que eras todo lo que queria y aun asi convertirme en mi propio peor enemigo.
             </p>
-            <div class="fire-line" id="fireLine"></div>
         </div>
     </div>
 
     <script>
-        // Inyectar llamas en la línea de fuego
-        const line = document.getElementById('fireLine');
-        function addFlame() {
-            const f = document.createElement('div');
-            f.className = 'flame';
-            f.style.left = Math.random() * 100 + '%';
-            line.appendChild(f);
-            setTimeout(() => f.remove(), 1000);
+        const fuego = document.getElementById('fuego');
+        
+        // Crear chispas que sigan a la línea de fuego
+        function crearChispas() {
+            const rect = fuego.getBoundingClientRect();
+            for(let i=0; i<3; i++) {
+                const chispa = document.createElement('div');
+                chispa.className = 'chispa';
+                chispa.style.left = (Math.random() * 100) + '%';
+                // La chispa sale de la posición actual de la línea de fuego
+                chispa.style.top = rect.top + 'px';
+                document.body.appendChild(chispa);
+                setTimeout(() => chispa.remove(), 2000);
+            }
         }
-        setInterval(addFlame, 100);
 
-        // Actualizar la variable de CSS para la máscara (para navegadores que no animan variables CSS nativamente)
-        let burnVal = -20;
-        const paper = document.getElementById('paper');
-        const startTime = Date.now();
-        const duration = 60000;
+        // Intervalo para chispas constante
+        setInterval(crearChispas, 150);
 
-        function updateBurn() {
-            const elapsed = Date.now() - startTime;
-            const progress = elapsed / duration;
-            burnVal = -20 + (120 * progress);
-            paper.style.setProperty('--burn', burnVal + '%');
-            
-            if (progress < 1) requestAnimationFrame(updateBurn);
-        }
-        updateBurn();
+        // Efecto visual: el texto se vuelve "brasas" al acercarse el fuego
+        const texto = document.getElementById('texto');
+        setTimeout(() => {
+            // A los 45 segundos el texto empieza a ponerse rojo/negro
+            texto.style.transition = "color 10s";
+            texto.style.color = "#ff4500";
+            setTimeout(() => {
+                texto.style.color = "#000";
+            }, 10000);
+        }, 40000);
     </script>
 </body>
 </html>
