@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para ti...</title>
+    <style>
+        body {
+            background: #0a0a0a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Georgia', serif;
+        }
+
+        /* Contenedor de la carta */
+        .carta-wrapper {
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .carta-container {
+            position: relative;
+            width: 90vw;
+            max-width: 450px;
+            padding: 40px;
+            background: #f4e4bc;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            border-radius: 2px;
+            z-index: 2;
+            transition: all 5s ease-in-out;
+        }
+
+        /* Barra de tiempo (mecha) */
+        .timer-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 5px;
+            background: linear-gradient(to right, #ff4500, #ff8c00);
+            width: 100%;
+            animation: countdown 30s linear forwards;
+        }
+
+        @keyframes countdown {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+
+        /* Texto */
+        h2 { color: #5d4037; text-align: center; margin-top: 0; }
+        p { 
+            color: #3e2723; 
+            line-height: 1.7; 
+            font-size: 1.05rem; 
+            white-space: pre-wrap;
+            text-align: justify;
+        }
+
+        /* Estado final: QUEMADO */
+        .quemar {
+            transform: scale(0.8) rotateX(10deg);
+            filter: brightness(0) blur(5px) sepia(1) hue-rotate(-50deg);
+            opacity: 0;
+            box-shadow: 0 0 100px 30px #ff2200;
+        }
+
+        /* Efecto de partículas/ceniza */
+        .ceniza {
+            position: absolute;
+            background: #ff4500;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 3;
+            animation: volar 2s ease-out forwards;
+        }
+
+        @keyframes volar {
+            to {
+                transform: translateY(-200px) translateX(20px) scale(0);
+                opacity: 0;
+            }
+        }
+
+        .mensaje-final {
+            position: absolute;
+            color: #444;
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: opacity 2s;
+            text-align: center;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="carta-wrapper">
+        <div class="carta-container" id="carta">
+            <div class="timer-bar"></div>
+            <h2>Lo que quería decirte...</h2>
+            <p>Se que la cague y es la parte mas dificil, la de no poder echarle la culpa a nadie más que a mi mismo, tuve algo real en mis manos algo que no se encuentra facil y lo rompi y no era porque no te quisiera sino porque no supe manejar lo que me pasaba por dentro, el miedo la inseguridad… ese enfado que a veces tenia y ni siquiera entendia de donde venia, lo peor es que tu eras justo lo que necesitaba tu forma de ver la vida tu calma tu humor esa manera tuya de hacer que todo fuera mas sencillo sin darte cuenta, contigo me sentia bien… aunque muchas veces fui incapaz de demostartelo o de cuidarlo como debia. No siempre el amor es suficiente cuando uno no esta bien consigo mismo y yo no lo estaba… y la verdad es que todavia estoy intentando estarlo. Hoy me pesa saber que eras mi lugar seguro y que fui yo quien lo quemo y duele de una forma que no se ni como explicar bien, saber que eras todo lo que queria y aun asi convertirme en mi propio peor enemigo.</p>
+        </div>
+        <div id="final" class="mensaje-final">Las palabras se las llevó el fuego.</div>
+    </div>
+
+    <script>
+        // Iniciar proceso de quemado automáticamente a los 30 segundos
+        setTimeout(() => {
+            const carta = document.getElementById('carta');
+            const final = document.getElementById('final');
+            
+            carta.classList.add('quemar');
+            
+            // Generar "cenizas" visuales
+            for(let i=0; i<50; i++) {
+                crearCeniza();
+            }
+
+            setTimeout(() => {
+                final.style.opacity = "1";
+            }, 3000);
+
+        }, 30000); // 30 segundos exactos
+
+        function crearCeniza() {
+            const ceniza = document.createElement('div');
+            ceniza.className = 'ceniza';
+            const size = Math.random() * 8 + 'px';
+            ceniza.style.width = size;
+            ceniza.style.height = size;
+            ceniza.style.left = Math.random() * 100 + '%';
+            ceniza.style.top = '50%';
+            document.body.appendChild(ceniza);
+            
+            setTimeout(() => ceniza.remove(), 2000);
+        }
+    </script>
+</body>
+</html>
