@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -19,35 +20,55 @@
         font-family: 'Georgia', serif;
     }
 
-    /* Juego y Carta */
-    #game-container { position: relative; width: 100vw; height: 100dvh; display: flex; justify-content: center; align-items: center; opacity: 0; transition: 1s; }
+    /* Contenedor principal */
+    #game-container { 
+        position: relative; 
+        width: 100vw; 
+        height: 100dvh; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        opacity: 0; 
+        transition: 1s; 
+    }
     
+    /* Área de texto con scroll interno invisible */
+    #scroll-wrapper {
+        width: 80%;
+        max-height: 70vh;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        scrollbar-width: none; /* Firefox */
+    }
+    #scroll-wrapper::-webkit-scrollbar { display: none; } /* Chrome/Safari */
+
     #texto-carta { 
-        width: 80%; 
         text-align: center; 
         line-height: 1.8; 
-        font-size: 1.1rem; 
+        font-size: 1.15rem; 
         opacity: 0.1; 
         transition: opacity 0.5s; 
         z-index: 1; 
-        white-space: pre-line; 
+        white-space: pre-line;
+        padding-bottom: 50px;
     }
 
     #overlay { 
         position: absolute; 
         inset: 0; 
-        background: radial-gradient(circle at var(--x) var(--y), transparent 10%, rgba(0,0,0,0.98) 25%); 
+        background: radial-gradient(circle at var(--x) var(--y), transparent 8%, rgba(0,0,0,0.98) 22%); 
         z-index: 2; 
         pointer-events: none; 
     }
 
     #instrucciones { 
         position: fixed; 
-        top: 20px; 
+        top: 30px; 
         width: 100%; 
         text-align: center; 
         font-style: italic; 
-        color: #555; 
+        color: #444; 
         z-index: 3; 
         opacity: 0; 
         transition: opacity 1s;
@@ -60,13 +81,15 @@
 <body>
 
 <div id="lock-screen">
-    <input type="password" id="pass" placeholder="Escribe aquí..." autofocus>
+    <input type="password" id="pass" placeholder="Contraseña..." autofocus>
 </div>
 
-<div id="instrucciones">Mantén presionado para disipar el humo...</div>
+<div id="instrucciones">Mantén presionado para ver...</div>
 
 <div id="game-container">
-    <div id="texto-carta"></div>
+    <div id="scroll-wrapper">
+        <div id="texto-carta"></div>
+    </div>
     <div id="overlay" style="--x: 50%; --y: 50%;"></div>
 </div>
 
@@ -79,6 +102,7 @@ No siempre el amor es suficiente cuando uno no esta bien consigo mismo y yo no l
 const passInput = document.getElementById('pass');
 const lockScreen = document.getElementById('lock-screen');
 const contenedor = document.getElementById('texto-carta');
+const scrollWrapper = document.getElementById('scroll-wrapper');
 const overlay = document.getElementById('overlay');
 let index = 0;
 let isPressing = false;
@@ -89,7 +113,10 @@ passInput.addEventListener('input', (e) => {
         accessGranted = true;
         lockScreen.style.opacity = "0";
         document.body.classList.add('unlocked');
-        setTimeout(() => lockScreen.remove(), 1000);
+        setTimeout(() => {
+            lockScreen.remove();
+            passInput.blur();
+        }, 1000);
     }
 });
 
@@ -105,7 +132,9 @@ function type() {
     if (isPressing && index < carta.length) {
         contenedor.innerHTML += carta[index];
         index++;
-        setTimeout(type, 35);
+        // Auto-scroll hacia abajo mientras escribe
+        scrollWrapper.scrollTop = scrollWrapper.scrollHeight;
+        setTimeout(type, 40);
     }
 }
 
@@ -131,3 +160,5 @@ window.addEventListener('touchmove', updateSpotlight);
 </script>
 </body>
 </html>
+
+```
