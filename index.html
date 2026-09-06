@@ -2,39 +2,137 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404 Not Found</title>
     <style>
         body { 
-            background-color: #f8f9fa; 
-            color: #212529; 
-            font-family: Arial, sans-serif; 
-            padding: 50px; 
-            max-width: 600px;
-            margin: 0 auto;
+            background-color: #111; 
+            color: #eee; 
+            font-family: monospace; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0; 
+            overflow: hidden; 
         }
-        h1 { 
-            font-size: 28px; 
-            border-bottom: 1px solid #dee2e6; 
-            padding-bottom: 15px; 
-            font-weight: normal;
-        }
-        p { 
-            font-size: 15px; 
-            color: #495057; 
-            margin-top: 20px; 
+        h1 { font-weight: normal; margin-bottom: 5px; color: #fff; }
+        p { color: #888; margin-bottom: 20px; font-size: 14px; }
+        canvas { 
+            border: 1px solid #333; 
+            background: #000; 
+            display: none; 
+            box-shadow: 0 0 15px rgba(255,255,255,0.05);
         }
         .signature { 
-            font-family: monospace;
-            font-size: 11px; 
-            color: #adb5bd; 
-            margin-top: 50px; 
-            text-align: right;
+            position: absolute; 
+            bottom: 10px; 
+            right: 15px; 
+            font-size: 10px; 
+            color: #333; 
+        }
+        #start-msg { 
+            color: #1ed760; 
+            cursor: pointer; 
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
         }
     </style>
 </head>
 <body>
     <h1>404 Not Found</h1>
-    <p>The requested resource could not be found on this server. Please check the URL or contact the server administrator.</p>
-    <div class="signature">err_trace: cf_host_terminated</div>
+    <p>Server resources have been reallocated.</p>
+    <div id="start-msg">[ Press SPACE or TAP to debug ]</div>
+    
+    <canvas id="game" width="300" height="300"></canvas>
+    
+    <div class="signature">err_trace: cf_host_offline</div>
+
+    <script>
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        const startMsg = document.getElementById('start-msg');
+        let snake, dx, dy, food, score, gameLoop;
+
+        function init() {
+            snake = [{x: 150, y: 150}];
+            dx = 10; dy = 0; score = 0;
+            placeFood();
+        }
+
+        function placeFood() {
+            food = {
+                x: Math.floor(Math.random() * 30) * 10, 
+                y: Math.floor(Math.random() * 30) * 10
+            };
+        }
+
+        function start() {
+            startMsg.style.display = 'none';
+            canvas.style.display = 'block';
+            init();
+            document.addEventListener('keydown', changeDir);
+            
+            // Controles táctiles simples para móvil
+            canvas.addEventListener('touchstart', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const touchX = e.touches[0].clientX - rect.left;
+                if(touchX < 150 && dx === 0) { dx = -10; dy = 0; }
+                else if(touchX >= 150 && dx === 0) { dx = 10; dy = 0; }
+                else if(dy === 0) { dx = 0; dy = dy === 0 ? 10 : -10; }
+            });
+
+            if(gameLoop) clearInterval(gameLoop);
+            gameLoop = setInterval(update, 100);
+        }
+
+        function update() {
+            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+            
+            // Chocar contra paredes o sí mismo
+            if(head.x < 0 || head.x >= 300 || head.y < 0 || head.y >= 300 || snake.some(s => s.x === head.x && s.y === head.y)) {
+                clearInterval(gameLoop);
+                startMsg.innerText = `Game Over | Score: ${score} | TAP to restart`;
+                startMsg.style.display = 'block';
+                canvas.style.display = 'none';
+                return;
+            }
+            
+            snake.unshift(head);
+            
+            // Comer
+            if(head.x === food.x && head.y === food.y) {
+                score++;
+                placeFood();
+            } else {
+                snake.pop();
+            }
+            draw();
+        }
+
+        function draw() {
+            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 300, 300);
+            ctx.fillStyle = '#fff'; // Color de la serpiente
+            snake.forEach(p => ctx.fillRect(p.x, p.y, 9, 9));
+            ctx.fillStyle = '#d43a4c'; // Color de la comida
+            ctx.fillRect(food.x, food.y, 9, 9);
+        }
+
+        function changeDir(e) {
+            if(e.key === 'ArrowUp' && dy === 0) { dx = 0; dy = -10; }
+            if(e.key === 'ArrowDown' && dy === 0) { dx = 0; dy = 10; }
+            if(e.key === 'ArrowLeft' && dx === 0) { dx = -10; dy = 0; }
+            if(e.key === 'ArrowRight' && dx === 0) { dx = 10; dy = 0; }
+        }
+
+        window.addEventListener('keydown', (e) => { 
+            if(e.key === ' ' && startMsg.style.display !== 'none') start(); 
+        });
+        startMsg.addEventListener('click', start);
+    </script>
 </body>
 </html>
