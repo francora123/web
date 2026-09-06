@@ -3,73 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - System Dump</title>
+    <title>Error 403 - Acceso Denegado</title>
     <style>
         body {
-            background: #0a0a0a;
-            color: #1ed760;
+            background-color: #070707;
+            color: #d1d1d1;
             font-family: 'Courier New', Courier, monospace;
             margin: 0;
-            padding: 20px;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
             height: 100vh;
+            padding: 20px;
             box-sizing: border-box;
-            font-size: 14px;
+            overflow: hidden;
         }
-        #console {
+        .terminal {
             max-width: 600px;
-            margin: 0 auto;
             width: 100%;
+            background: #111;
+            border: 1px solid #2a2a2a;
+            border-radius: 6px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.8);
         }
-        .line { margin-bottom: 10px; line-height: 1.4; }
-        .error { color: #d43a4c; font-weight: bold; font-size: 16px; margin-top: 20px; }
-        .cursor { display: inline-block; width: 8px; height: 15px; background: #1ed760; animation: blink 1s step-end infinite; }
+        .header {
+            color: #d43a4c;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #2a2a2a;
+            padding-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header span {
+            font-size: 12px;
+            color: #666;
+            font-weight: normal;
+        }
+        .log {
+            font-size: 13px;
+            line-height: 1.8;
+            margin-bottom: 10px;
+            display: none; /* Oculto inicialmente para la animación */
+        }
+        .ok { color: #1ed760; }
+        .info { color: #5bc0de; }
+        .warn { color: #f0ad4e; }
+        .crit { color: #d43a4c; font-weight: bold; }
+        
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 15px;
+            background: #fff;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+            margin-top: 15px;
+        }
         @keyframes blink { 50% { opacity: 0; } }
-        .signature { position: fixed; bottom: 10px; right: 10px; font-size: 10px; color: #333; }
+        
+        .signature {
+            margin-top: 40px;
+            font-size: 10px;
+            color: #333;
+            text-align: right;
+            border-top: 1px dotted #222;
+            padding-top: 10px;
+        }
     </style>
 </head>
 <body>
-    <div id="console"></div>
-    <div class="signature">err_trace: cf_sys_dump</div>
-    
+
+    <div class="terminal">
+        <div class="header">
+            ERROR 403: FORBIDDEN <span>Server_Diagnostic_Tool</span>
+        </div>
+        
+        <div id="console">
+            <!-- Las líneas se inyectarán aquí con JavaScript -->
+        </div>
+        <div class="cursor" id="cursor"></div>
+
+        <div class="signature">err_trace: host_cf_terminated</div>
+    </div>
+
     <script>
-        const lines = [
-            "> INITIALIZING CONNECTION...",
-            "> REQUESTING MODULE: ALOJAMIENTO.SYS... [GRANTED]",
-            "> PROCESSING: PAPELES_LEGALES (TIPO: PAREJA_DE_HECHO)... [APPROVED]",
-            "> EXTRACTING RECURSOS Y TIEMPO... [100% COMPLETE]",
-            "> CORRUPTING FILE: CIRCULO_SOCIAL.DAT... [SUCCESS]",
-            "> SEARCHING NEW HOST...",
-            "> NEW HOST DETECTED. INITIATING TRANSFER...",
-            "> DISCONNECTING ORIGINAL HOST...",
-            " ",
-            "ERROR 404: EMPATÍA Y LEALTAD NOT FOUND.",
-            "PROJECT TERMINATED."
+        const logs = [
+            "> Iniciando auditoría de desvinculación...",
+            "<span class='ok'>[OK]</span> Asignación de espacio en entorno local (Host) provisto con éxito.",
+            "<span class='ok'>[OK]</span> Emisión de certificados de validación y estado legal completada.",
+            "<span class='info'>[INFO]</span> Tiempo de permanencia en el nodo antes de abandono: Aprox. 30 días.",
+            "<span class='warn'>[WARN]</span> Redirección repentina a nodo de terceros no autorizado detectada.",
+            "<span class='crit'>[CRITICAL]</span> Inyección de paquetes de datos falsos en la red compartida.",
+            "> Evaluando protocolo de seguridad...",
+            "<span class='crit'>[SISTEMA]</span> Incompatibilidad de valores. Lealtad.dll no encontrada.",
+            "<span class='crit'>[SISTEMA]</span> Cortafuegos activado. Acceso del cliente revocado permanentemente."
         ];
-        
+
         const consoleDiv = document.getElementById('console');
-        let i = 0;
-        
-        function typeLine() {
-            if (i < lines.length) {
-                const lineDiv = document.createElement('div');
-                lineDiv.className = (i >= lines.length - 2) ? 'line error' : 'line';
-                lineDiv.innerText = lines[i];
-                consoleDiv.appendChild(lineDiv);
+        let index = 0;
+
+        function showNextLog() {
+            if (index < logs.length) {
+                const p = document.createElement('div');
+                p.className = 'log';
+                p.innerHTML = logs[index];
+                consoleDiv.appendChild(p);
                 
-                let delay = (i === 2 || i === 4) ? 1800 : 900; 
-                i++;
-                setTimeout(typeLine, delay);
-            } else {
-                const cursor = document.createElement('div');
-                cursor.className = 'cursor';
-                consoleDiv.appendChild(cursor);
+                // Efecto de aparecer suavemente
+                p.style.display = 'block';
+                
+                // Variar el tiempo de "pensamiento" del servidor para darle realismo
+                let delay = (index === 5 || index === 7) ? 2000 : 900;
+                index++;
+                setTimeout(showNextLog, delay);
             }
         }
-        
-        setTimeout(typeLine, 1000);
+
+        // Iniciar la animación al cargar la página
+        setTimeout(showNextLog, 1000);
     </script>
+
 </body>
 </html>
