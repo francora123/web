@@ -12,8 +12,8 @@
             background-color: #050505; color: #0f0;
             font-family: 'Share Tech Mono', monospace;
             overflow: hidden; user-select: none;
-            touch-action: none; /* Bloquea gestos de recargar en móvil */
-            word-wrap: break-word; /* Evita que el texto se salga de la pantalla */
+            touch-action: none;
+            word-wrap: break-word;
         }
 
         .crt::before {
@@ -39,27 +39,34 @@
         .cursor { display: inline-block; width: 8px; height: 14px; background: #0f0; animation: blink 1s step-end infinite; vertical-align: middle; }
         @keyframes blink { 50% { opacity: 0; } }
 
-        /* Pantallazo Rojo 100% adaptado a móvil */
+        /* Pantallazo Rojo Extremo */
         #crash-screen {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #d40000; color: #fff; z-index: 9999;
             flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; text-shadow: 2px 2px 0 #000; padding: 20px; box-sizing: border-box;
+            text-align: center; text-shadow: 3px 3px 0 #000; padding: 20px; box-sizing: border-box;
         }
         #crash-screen h1 { 
-            font-size: 10vw; /* Se ajusta al ancho de la pantalla */
-            margin: 0; letter-spacing: 2px; line-height: 1.1; 
+            font-size: 12vw; margin: 0; letter-spacing: 2px; line-height: 1; 
         }
         #crash-screen p { 
-            font-size: 4.5vw; margin-top: 15px; opacity: 0.9;
+            font-size: 5vw; margin-top: 15px; font-weight: bold;
         }
 
-        .shake { animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-3px, 0, 0); }
-            20%, 80% { transform: translate3d(3px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
-            40%, 60% { transform: translate3d(6px, 0, 0); }
+        /* Temblor mucho más agresivo */
+        .shake-hard { animation: shake-hard 0.2s infinite; }
+        @keyframes shake-hard {
+            0% { transform: translate(5px, 5px) rotate(0deg); }
+            10% { transform: translate(-5px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
         }
     </style>
 </head>
@@ -96,7 +103,6 @@
 
         let logIndex = 0;
 
-        // Decodificación acelerada
         function decodeText(element, realText, callback) {
             let iterations = 0;
             const interval = setInterval(() => {
@@ -108,9 +114,9 @@
                 
                 if (iterations >= realText.length) {
                     clearInterval(interval);
-                    setTimeout(callback, 150); // Pausa súper corta
+                    setTimeout(callback, 150);
                 }
-                iterations += 1.5; // Velocidad x2
+                iterations += 1.5;
             }, 15);
         }
 
@@ -118,27 +124,19 @@
             if (logIndex < logs.length) {
                 const div = document.createElement('div');
                 div.className = `line ${logs[logIndex].type}`;
-                
-                const prefix = document.createElement('span');
-                prefix.innerText = `[${logs[logIndex].type.toUpperCase()}] `;
-                
-                const msg = document.createElement('span');
-                
-                div.appendChild(prefix);
-                div.appendChild(msg);
+                div.innerHTML = `<span>[${logs[logIndex].type.toUpperCase()}] </span><span></span>`;
                 
                 if(terminal.contains(cursor)) terminal.removeChild(cursor);
                 terminal.appendChild(div);
                 terminal.appendChild(cursor);
                 
-                decodeText(msg, logs[logIndex].text, processLogs);
+                decodeText(div.childNodes[1], logs[logIndex].text, processLogs);
                 logIndex++;
             } else {
                 setTimeout(startPurge, 300);
             }
         }
 
-        // Purga a máxima velocidad
         function startPurge() {
             const warning = document.createElement('div');
             warning.className = 'line err';
@@ -157,7 +155,7 @@
                     clearInterval(purgeInterval);
                     setTimeout(showInputTrap, 400);
                 }
-            }, 60); // Casi instantáneo
+            }, 60);
         }
 
         let trapReady = false;
@@ -169,24 +167,47 @@
             trapReady = true;
         }
 
+        // Generar un pitido molesto usando Web Audio API
+        function playErrorSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+
+                oscillator.type = 'sawtooth'; // Sonido rasgado/molesto
+                oscillator.frequency.setValueAtTime(150, audioCtx.currentTime); // Tono grave
+                oscillator.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.8);
+
+                gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 1);
+            } catch (e) {
+                // Si el navegador bloquea el audio, no pasa nada, sigue lo demás
+            }
+        }
+
         function triggerCrash(e) {
             if (!trapReady) return;
             trapReady = false;
             
-            // Si el móvil lo soporta, vibra
-            if (navigator.vibrate) {
-                navigator.vibrate([200, 50, 200, 50, 400]);
-            }
-
-            document.body.classList.add('shake');
+            // 1. Intentar vibración
+            if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 500]);
             
-            // Borra la consola visualmente y muestra la pantalla roja
+            // 2. Reproducir sonido de fallo
+            playErrorSound();
+
+            // 3. Efectos visuales extremos
+            document.body.classList.add('shake-hard');
             terminal.style.display = 'none';
             const crashScreen = document.getElementById('crash-screen');
             crashScreen.style.display = 'flex';
         }
 
-        // Detecta toques en cualquier parte de la pantalla
         window.addEventListener('touchstart', triggerCrash, {passive: false});
         window.addEventListener('click', triggerCrash);
         window.addEventListener('keydown', triggerCrash);
