@@ -1,138 +1,135 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 Not Found</title>
+    <title>404 - Not Found</title>
     <style>
-        body { 
-            background-color: #111; 
-            color: #eee; 
-            font-family: monospace; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            margin: 0; 
-            overflow: hidden; 
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #0b0b0b;
+            color: #fff;
+            font-family: monospace;
+            cursor: none; /* Oculta el cursor para que tú seas el punto blanco */
         }
-        h1 { font-weight: normal; margin-bottom: 5px; color: #fff; }
-        p { color: #888; margin-bottom: 20px; font-size: 14px; }
-        canvas { 
-            border: 1px solid #333; 
-            background: #000; 
-            display: none; 
-            box-shadow: 0 0 15px rgba(255,255,255,0.05);
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none;
         }
-        .signature { 
-            position: absolute; 
-            bottom: 10px; 
-            right: 15px; 
-            font-size: 10px; 
-            color: #333; 
+        h1 { margin: 0; font-size: 18px; font-weight: normal; color: #a0a0a0; }
+        #bar-container {
+            width: 200px;
+            height: 10px;
+            background: #222;
+            margin-top: 10px;
+            border: 1px solid #444;
         }
-        #start-msg { 
-            color: #1ed760; 
-            cursor: pointer; 
-            animation: pulse 1.5s infinite;
+        #bar {
+            width: 100%;
+            height: 100%;
+            background: #1ed760;
+            transition: width 0.1s, background 0.3s;
         }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
+        #message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            display: none;
+        }
+        #message h2 { color: #d43a4c; font-size: 32px; margin-bottom: 10px; }
+        #message p { color: #888; }
+        .signature {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 10px;
+            color: #222;
         }
     </style>
 </head>
 <body>
-    <h1>404 Not Found</h1>
-    <p>Server resources have been reallocated.</p>
-    <div id="start-msg">[ Press SPACE or TAP to debug ]</div>
+    <div id="ui">
+        <h1 id="status">Status: Hosting Client...</h1>
+        <div id="bar-container"><div id="bar"></div></div>
+    </div>
+
+    <div id="message">
+        <h2>404 NOT FOUND</h2>
+        <p>Host resources depleted. Client disconnected and relocated.</p>
+    </div>
+
+    <canvas id="canvas"></canvas>
     
-    <canvas id="game" width="300" height="300"></canvas>
-    
-    <div class="signature">err_trace: cf_host_offline</div>
+    <div class="signature">err_trace: cf_sys_drain</div>
 
     <script>
-        const canvas = document.getElementById('game');
+        const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        const startMsg = document.getElementById('start-msg');
-        let snake, dx, dy, food, score, gameLoop;
+        const bar = document.getElementById('bar');
+        const status = document.getElementById('status');
+        const msg = document.getElementById('message');
 
-        function init() {
-            snake = [{x: 150, y: 150}];
-            dx = 10; dy = 0; score = 0;
-            placeFood();
-        }
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-        function placeFood() {
-            food = {
-                x: Math.floor(Math.random() * 30) * 10, 
-                y: Math.floor(Math.random() * 30) * 10
-            };
-        }
+        let host = { x: canvas.width / 2, y: canvas.height / 2, r: 8, energy: 100 };
+        let parasite = { x: -50, y: -50, r: 12, speed: 0.04 };
+        let active = true;
 
-        function start() {
-            startMsg.style.display = 'none';
-            canvas.style.display = 'block';
-            init();
-            document.addEventListener('keydown', changeDir);
-            
-            // Controles táctiles simples para móvil
-            canvas.addEventListener('touchstart', (e) => {
-                const rect = canvas.getBoundingClientRect();
-                const touchX = e.touches[0].clientX - rect.left;
-                if(touchX < 150 && dx === 0) { dx = -10; dy = 0; }
-                else if(touchX >= 150 && dx === 0) { dx = 10; dy = 0; }
-                else if(dy === 0) { dx = 0; dy = dy === 0 ? 10 : -10; }
-            });
+        // Seguir al ratón o dedo
+        window.addEventListener('mousemove', e => { host.x = e.clientX; host.y = e.clientY; });
+        window.addEventListener('touchmove', e => { host.x = e.touches[0].clientX; host.y = e.touches[0].clientY; });
 
-            if(gameLoop) clearInterval(gameLoop);
-            gameLoop = setInterval(update, 100);
-        }
+        function loop() {
+            ctx.fillStyle = '#0b0b0b';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        function update() {
-            const head = {x: snake[0].x + dx, y: snake[0].y + dy};
-            
-            // Chocar contra paredes o sí mismo
-            if(head.x < 0 || head.x >= 300 || head.y < 0 || head.y >= 300 || snake.some(s => s.x === head.x && s.y === head.y)) {
-                clearInterval(gameLoop);
-                startMsg.innerText = `Game Over | Score: ${score} | TAP to restart`;
-                startMsg.style.display = 'block';
-                canvas.style.display = 'none';
-                return;
-            }
-            
-            snake.unshift(head);
-            
-            // Comer
-            if(head.x === food.x && head.y === food.y) {
-                score++;
-                placeFood();
+            if (active) {
+                // El parásito persigue al host
+                parasite.x += (host.x - parasite.x) * parasite.speed;
+                parasite.y += (host.y - parasite.y) * parasite.speed;
+
+                // Colisión (drenar energía)
+                const dist = Math.hypot(host.x - parasite.x, host.y - parasite.y);
+                if (dist < host.r + parasite.r) {
+                    host.energy -= 0.5;
+                    bar.style.width = Math.max(0, host.energy) + '%';
+                    
+                    if(host.energy < 50) bar.style.background = '#d43a4c';
+
+                    if (host.energy <= 0) {
+                        active = false; // Se acabó la energía
+                        status.innerText = "Status: Connection Dropped";
+                        msg.style.display = 'block';
+                        document.body.style.cursor = 'auto'; // Devuelve el cursor
+                    }
+                }
+
+                // Dibujar host (tú)
+                ctx.beginPath();
+                ctx.arc(host.x, host.y, host.r, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
             } else {
-                snake.pop();
+                // El parásito huye al vaciarte
+                parasite.x += 15; // Se va rápido a la derecha
+                parasite.y -= 5;
             }
-            draw();
-        }
 
-        function draw() {
-            ctx.fillStyle = '#000'; ctx.fillRect(0, 0, 300, 300);
-            ctx.fillStyle = '#fff'; // Color de la serpiente
-            snake.forEach(p => ctx.fillRect(p.x, p.y, 9, 9));
-            ctx.fillStyle = '#d43a4c'; // Color de la comida
-            ctx.fillRect(food.x, food.y, 9, 9);
-        }
+            // Dibujar parásito (ella)
+            ctx.beginPath();
+            ctx.arc(parasite.x, parasite.y, parasite.r + (100 - host.energy)*0.1, 0, Math.PI * 2);
+            ctx.fillStyle = active ? '#d43a4c' : '#444'; // Se apaga cuando se va
+            ctx.fill();
 
-        function changeDir(e) {
-            if(e.key === 'ArrowUp' && dy === 0) { dx = 0; dy = -10; }
-            if(e.key === 'ArrowDown' && dy === 0) { dx = 0; dy = 10; }
-            if(e.key === 'ArrowLeft' && dx === 0) { dx = -10; dy = 0; }
-            if(e.key === 'ArrowRight' && dx === 0) { dx = 10; dy = 0; }
+            requestAnimationFrame(loop);
         }
-
-        window.addEventListener('keydown', (e) => { 
-            if(e.key === ' ' && startMsg.style.display !== 'none') start(); 
-        });
-        startMsg.addEventListener('click', start);
+        loop();
     </script>
 </body>
 </html>
