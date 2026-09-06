@@ -47,7 +47,7 @@
             flex-direction: column; justify-content: center; align-items: center;
             text-align: center; text-shadow: 3px 3px 0 #000; padding: 20px; box-sizing: border-box;
             overflow: hidden;
-            animation: flash-strobe 0.15s infinite; /* Efecto estroboscópico de susto al entrar */
+            animation: flash-strobe 0.15s infinite;
         }
 
         @keyframes flash-strobe {
@@ -69,20 +69,14 @@
             font-size: 4.5vw; margin-top: 15px; font-weight: bold; z-index: 10; color: #ff9999;
         }
 
-        /* Gusanos blandos con animación orgánica */
+        /* Gusanos rápidos */
         .worm {
             position: absolute;
             pointer-events: none;
             z-index: 5;
             filter: drop-shadow(2px 3px 5px rgba(0,0,0,0.9));
-            animation: squirm 1.2s infinite alternate ease-in-out; 
-            transition: left 0.6s ease-in-out, top 0.6s ease-in-out, transform 0.3s ease;
-        }
-
-        @keyframes squirm {
-            0% { transform: scaleX(1) scaleY(1) rotate(var(--rot)); }
-            50% { transform: scaleX(1.4) scaleY(0.6) rotate(var(--rot)); }
-            100% { transform: scaleX(0.8) scaleY(1.2) rotate(var(--rot)); }
+            /* Transición muy rápida para que corran por la pantalla */
+            transition: left 0.15s linear, top 0.15s linear, transform 0.15s ease;
         }
 
         .shake-hard { animation: shake-hard 0.15s infinite; }
@@ -217,7 +211,7 @@
         function spawnWorms() {
             const wormTypes = ['🪱', '🐛', '🦠', '🪱', '🧬']; 
             const crashScreen = document.getElementById('crash-screen');
-            const numWorms = 65; // Más masa de bichos
+            const numWorms = 65; 
 
             for (let i = 0; i < numWorms; i++) {
                 const worm = document.createElement('div');
@@ -230,30 +224,27 @@
                 worm.style.top = y + 'px';
                 
                 worm.style.fontSize = (Math.random() * 30 + 25) + 'px';
-                
-                let angle = Math.random() * 360;
-                worm.style.setProperty('--rot', `${angle}deg`);
-
                 crashScreen.appendChild(worm);
 
+                // Movimiento rápido y errático por toda la pantalla
                 setInterval(() => {
-                    let nextX = x + (Math.random() - 0.5) * 60;
-                    let nextY = y + (Math.random() - 0.5) * 60;
+                    let nextX = x + (Math.random() - 0.5) * 300;
+                    let nextY = y + (Math.random() - 0.5) * 300;
                     
                     if(nextX < -50) nextX = window.innerWidth + 50;
                     if(nextX > window.innerWidth + 50) nextX = -50;
                     if(nextY < -50) nextY = window.innerHeight + 50;
                     if(nextY > window.innerHeight + 50) nextY = -50;
 
-                    let newAngle = Math.atan2(nextY - y, nextX - x) * (180 / Math.PI) + 90;
+                    let angle = Math.atan2(nextY - y, nextX - x) * (180 / Math.PI) + 90;
                     
                     worm.style.left = nextX + 'px';
                     worm.style.top = nextY + 'px';
-                    worm.style.setProperty('--rot', `${newAngle}deg`);
+                    worm.style.transform = `rotate(${angle}deg)`;
                     
                     x = nextX;
                     y = nextY;
-                }, Math.random() * 700 + 400);
+                }, Math.random() * 200 + 150); // Intervalo corto para que vayan a gran velocidad
             }
         }
 
@@ -261,7 +252,6 @@
             if (!trapReady) return;
             trapReady = false;
             
-            // Vibración larga y seca de alerta
             if (navigator.vibrate) navigator.vibrate([500, 100, 500, 100, 800]);
             playErrorSound();
 
@@ -270,7 +260,6 @@
             const crashScreen = document.getElementById('crash-screen');
             crashScreen.style.display = 'flex';
 
-            // Quitar el parpadeo estroboscópico fuerte a los 2 segundos para que no moleste de más, dejando solo los gusanos y el temblor
             setTimeout(() => {
                 crashScreen.style.animation = 'none';
             }, 2000);
