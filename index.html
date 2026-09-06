@@ -2,153 +2,74 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>404 - Not Found</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - System Dump</title>
     <style>
         body {
+            background: #0a0a0a;
+            color: #1ed760;
+            font-family: 'Courier New', Courier, monospace;
             margin: 0;
-            overflow: hidden;
-            background-color: #0b0b0b;
-            color: #fff;
-            font-family: monospace;
-            touch-action: none; /* Bloquea el scroll al jugar en móvil */
-            overscroll-behavior: none;
-            cursor: none;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100vh;
+            box-sizing: border-box;
+            font-size: 14px;
         }
-        #ui {
-            position: absolute;
-            top: 25px;
-            left: 20px;
-            right: 20px;
-            pointer-events: none;
-        }
-        h1 { margin: 0; font-size: 16px; font-weight: normal; color: #a0a0a0; }
-        #bar-container {
+        #console {
+            max-width: 600px;
+            margin: 0 auto;
             width: 100%;
-            max-width: 300px;
-            height: 12px;
-            background: #222;
-            margin-top: 10px;
-            border: 1px solid #444;
-            border-radius: 4px;
-            overflow: hidden;
         }
-        #bar {
-            width: 100%;
-            height: 100%;
-            background: #1ed760;
-            transition: width 0.1s, background 0.3s;
-        }
-        #message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            display: none;
-            width: 90%;
-        }
-        #message h2 { color: #d43a4c; font-size: 28px; margin-bottom: 10px; }
-        #message p { color: #888; font-size: 14px; line-height: 1.5; }
-        .signature {
-            position: absolute;
-            bottom: 10px;
-            right: 15px;
-            font-size: 10px;
-            color: #222;
-        }
-        canvas { display: block; }
+        .line { margin-bottom: 10px; line-height: 1.4; }
+        .error { color: #d43a4c; font-weight: bold; font-size: 16px; margin-top: 20px; }
+        .cursor { display: inline-block; width: 8px; height: 15px; background: #1ed760; animation: blink 1s step-end infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+        .signature { position: fixed; bottom: 10px; right: 10px; font-size: 10px; color: #333; }
     </style>
 </head>
 <body>
-    <div id="ui">
-        <h1 id="status">Status: Hosting Client...</h1>
-        <div id="bar-container"><div id="bar"></div></div>
-    </div>
-
-    <div id="message">
-        <h2>404 NOT FOUND</h2>
-        <p>Host resources depleted.<br>Client disconnected and relocated.</p>
-    </div>
-
-    <canvas id="canvas"></canvas>
+    <div id="console"></div>
+    <div class="signature">err_trace: cf_sys_dump</div>
     
-    <div class="signature">err_trace: cf_sys_drain</div>
-
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const bar = document.getElementById('bar');
-        const status = document.getElementById('status');
-        const msg = document.getElementById('message');
-
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        let host = { x: canvas.width / 2, y: canvas.height / 1.5, r: 10, energy: 100 };
-        let parasite = { x: -50, y: -50, r: 14, speed: 0.045 };
-        let active = true;
-
-        // Controles adaptados para móvil y PC
-        function moveHost(e) {
-            if(!active) return;
-            host.x = e.clientX || (e.touches && e.touches[0].clientX);
-            host.y = e.clientY || (e.touches && e.touches[0].clientY);
-        }
-
-        window.addEventListener('mousemove', moveHost);
-        window.addEventListener('touchstart', e => { e.preventDefault(); moveHost(e); }, {passive: false});
-        window.addEventListener('touchmove', e => { e.preventDefault(); moveHost(e); }, {passive: false});
-
-        function loop() {
-            ctx.fillStyle = '#0b0b0b';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            if (active) {
-                // Persecución
-                parasite.x += (host.x - parasite.x) * parasite.speed;
-                parasite.y += (host.y - parasite.y) * parasite.speed;
-
-                // Drenaje de energía
-                const dist = Math.hypot(host.x - parasite.x, host.y - parasite.y);
-                if (dist < host.r + parasite.r) {
-                    host.energy -= 0.6; // Velocidad de desgaste
-                    bar.style.width = Math.max(0, host.energy) + '%';
-                    
-                    if(host.energy < 40) bar.style.background = '#d43a4c';
-
-                    if (host.energy <= 0) {
-                        active = false;
-                        status.innerText = "Status: Connection Dropped";
-                        msg.style.display = 'block';
-                        document.body.style.cursor = 'auto';
-                    }
-                }
-
-                // Dibujar Host (Tú)
-                ctx.beginPath();
-                ctx.arc(host.x, host.y, host.r, 0, Math.PI * 2);
-                ctx.fillStyle = '#ffffff';
-                ctx.fill();
+        const lines = [
+            "> INITIALIZING CONNECTION...",
+            "> REQUESTING MODULE: ALOJAMIENTO.SYS... [GRANTED]",
+            "> PROCESSING: PAPELES_LEGALES (TIPO: PAREJA_DE_HECHO)... [APPROVED]",
+            "> EXTRACTING RECURSOS Y TIEMPO... [100% COMPLETE]",
+            "> CORRUPTING FILE: CIRCULO_SOCIAL.DAT... [SUCCESS]",
+            "> SEARCHING NEW HOST...",
+            "> NEW HOST DETECTED. INITIATING TRANSFER...",
+            "> DISCONNECTING ORIGINAL HOST...",
+            " ",
+            "ERROR 404: EMPATÍA Y LEALTAD NOT FOUND.",
+            "PROJECT TERMINATED."
+        ];
+        
+        const consoleDiv = document.getElementById('console');
+        let i = 0;
+        
+        function typeLine() {
+            if (i < lines.length) {
+                const lineDiv = document.createElement('div');
+                lineDiv.className = (i >= lines.length - 2) ? 'line error' : 'line';
+                lineDiv.innerText = lines[i];
+                consoleDiv.appendChild(lineDiv);
+                
+                let delay = (i === 2 || i === 4) ? 1800 : 900; 
+                i++;
+                setTimeout(typeLine, delay);
             } else {
-                // El parásito abandona la pantalla rápido
-                parasite.x += 12;
-                parasite.y -= 12;
+                const cursor = document.createElement('div');
+                cursor.className = 'cursor';
+                consoleDiv.appendChild(cursor);
             }
-
-            // Dibujar Parásito (Ella) - Crece ligeramente a medida que te vacía
-            ctx.beginPath();
-            ctx.arc(parasite.x, parasite.y, parasite.r + (100 - host.energy) * 0.15, 0, Math.PI * 2);
-            ctx.fillStyle = active ? '#d43a4c' : '#333'; 
-            ctx.fill();
-
-            requestAnimationFrame(loop);
         }
-        loop();
+        
+        setTimeout(typeLine, 1000);
     </script>
 </body>
 </html>
