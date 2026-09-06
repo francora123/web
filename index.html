@@ -3,43 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>500 Internal Server Error</title>
+    <title>ERR_CONNECTION_REFUSED</title>
     <style>
-        body {
-            background-color: #080808;
-            color: #00ff66;
-            font-family: 'Courier New', Courier, monospace;
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+        body, html {
             margin: 0;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            box-sizing: border-box;
-            font-size: 13px;
-        }
-        .console {
-            max-width: 750px;
+            padding: 0;
             width: 100%;
-            line-height: 1.6;
+            height: 100%;
+            background-color: #030303;
+            color: #0f0;
+            font-family: 'Share Tech Mono', monospace;
+            overflow: hidden;
         }
-        .dim { color: #555; }
-        .warn { color: #ffaa00; }
-        .error { color: #ff3333; font-weight: bold; }
-        .success { color: #00ff66; }
+
+        /* Efecto de pantalla CRT antigua */
+        .crt::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        #terminal {
+            position: relative;
+            padding: 2rem;
+            height: 100%;
+            box-sizing: border-box;
+            z-index: 1;
+            font-size: 15px;
+            line-height: 1.6;
+            text-shadow: 0 0 5px #0f0;
+            overflow-y: auto;
+        }
+
+        .line { margin-bottom: 8px; display: none; }
+        
+        /* Colores de los logs */
+        .sys { color: #888; text-shadow: 0 0 3px #888; }
+        .ok { color: #0f0; }
+        .warn { color: #ff0; text-shadow: 0 0 5px #ff0; }
+        .err { color: #f00; text-shadow: 0 0 5px #f00; }
+        
+        .timestamp { opacity: 0.5; margin-right: 15px; }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 18px;
+            background: #0f0;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Efecto Glitch para el error final */
+        .glitch {
+            position: relative;
+            color: #f00;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-top: 2rem;
+            display: none;
+            text-align: center;
+            text-shadow: 0 0 10px #f00;
+        }
+        .glitch::before, .glitch::after {
+            content: "SYSTEM_HALTED";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #030303;
+        }
+        .glitch::before {
+            left: 2px;
+            text-shadow: -2px 0 #0f0;
+            clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%);
+            animation: glitch-anim 2s infinite linear alternate-reverse;
+        }
+        .glitch::after {
+            left: -2px;
+            text-shadow: -2px 0 #00f;
+            clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%);
+            animation: glitch-anim 1.5s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-anim {
+            0% { clip-path: polygon(0 2%, 100% 2%, 100% 5%, 0 5%); }
+            20% { clip-path: polygon(0 15%, 100% 15%, 100% 15%, 0 15%); }
+            40% { clip-path: polygon(0 10%, 100% 10%, 100% 20%, 0 20%); }
+            60% { clip-path: polygon(0 1%, 100% 1%, 100% 2%, 0 2%); }
+            80% { clip-path: polygon(0 33%, 100% 33%, 100% 33%, 0 33%); }
+            100% { clip-path: polygon(0 44%, 100% 44%, 100% 44%, 0 44%); }
+        }
     </style>
 </head>
-<body>
-    <div class="console">
-        <div class="dim">[SYSTEM_BOOT] Initializing core modules...</div>
-        <div><span class="dim">[0.0012]</span> MEMORY_ALLOC: /var/local/host allocated (100%)</div>
-        <div><span class="dim">[0.0431]</span> AUTH_DAEMON: Token 'permanent_residency' granted with root privileges.</div>
-        <div><span class="dim">[720.00]</span> TIMER_EXPIRED: Session TTL threshold reached (720h).</div>
-        <div><span class="warn">[WARN]</span> NET_ROUTE: Outbound packet redirected to unregistered external peer.</div>
-        <div><span class="error">[FATAL]</span> DB_EXCEPTION: SQL Injection detected in table 'trusted_nodes'.</div>
-        <div><span class="error">[CRITICAL]</span> SEGFAULT: Core memory corruption at 0x00007FFF.</div>
-        <div class="dim">[CLEANUP] Unmounting local volumes...</div>
-        <div><span class="success">[OK]</span> Connection terminated. Host resources reclaimed successfully.</div>
+<body class="crt">
+    <div id="terminal">
+        <!-- JS inyectará el código aquí -->
     </div>
+
+    <script>
+        const terminal = document.getElementById('terminal');
+        let cursor = document.createElement('span');
+        cursor.className = 'cursor';
+
+        function getTS() {
+            return `[${(performance.now() / 1000).toFixed(4)}]`;
+        }
+
+        const bootSequence = [
+            { t: 'sys', msg: 'INIT_SEQ: Bootstrapping host environment...' },
+            { t: 'ok',  msg: 'VFS_ALLOC: Local physical volumes mounted successfully. (100%)' },
+            { t: 'ok',  msg: 'AUTH_SYS: Privilege escalation confirmed. Auth_Token upgraded to [PERMANENT_STATUS].' },
+            { t: 'sys', msg: 'KERNEL: Background daemon active. Monitoring outbound connections...' },
+            { t: 'warn',msg: 'SYS_TICK: Session TTL threshold reached (720h). Connection unstable.' },
+            { t: 'warn',msg: 'NET_ROUTE: TCP handshake intercepted. Outbound traffic rerouted to untrusted external peer.' },
+            { t: 'err', msg: 'SEC_ALARM: SQL Injection detected in subnet cluster [trusted_nodes.db].' },
+            { t: 'err', msg: 'DATA_CORRUPTION: Malformed packets broadcasting to internal network.' },
+            { t: 'err', msg: 'KERNEL_PANIC: Core integrity compromised. Missing dependencies in empath.so.' },
+            { t: 'sys', msg: 'SIGKILL: Terminating all active threads. Reclaiming host resources.' },
+            { t: 'ok',  msg: 'CLEANUP: Connections closed. Access permanently revoked.' }
+        ];
+
+        let i = 0;
+
+        function typeLine() {
+            if (i < bootSequence.length) {
+                const step = bootSequence[i];
+                const div = document.createElement('div');
+                div.className = `line ${step.t}`;
+                div.innerHTML = `<span class="timestamp">${getTS()}</span> ${step.msg}`;
+                
+                if(terminal.contains(cursor)) terminal.removeChild(cursor);
+                terminal.appendChild(div);
+                terminal.appendChild(cursor);
+                
+                div.style.display = 'block';
+                terminal.scrollTop = terminal.scrollHeight;
+
+                // Tiempos ajustados para dar dramatismo a la animación
+                let delay = Math.random() * 300 + 200;
+                if (i === 2) delay = 1200; // Pausa en los papeles
+                if (i === 4) delay = 1800; // Pausa en las 720h (el mes)
+                if (i === 6) delay = 1500; // Pausa en la manipulación (SQL Injection)
+                
+                i++;
+                setTimeout(typeLine, delay);
+            } else {
+                cursor.style.animation = "none";
+                cursor.style.opacity = "0";
+                setTimeout(showGlitch, 1000);
+            }
+        }
+
+        function showGlitch() {
+            const glitch = document.createElement('div');
+            glitch.className = 'glitch';
+            glitch.innerText = 'SYSTEM_HALTED';
+            terminal.appendChild(glitch);
+            glitch.style.display = 'block';
+        }
+
+        setTimeout(typeLine, 800);
+    </script>
 </body>
 </html>
