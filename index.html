@@ -39,53 +39,60 @@
         .cursor { display: inline-block; width: 8px; height: 14px; background: #0f0; animation: blink 1s step-end infinite; vertical-align: middle; }
         @keyframes blink { 50% { opacity: 0; } }
 
-        /* Pantallazo Rojo Extremo */
+        /* Pantallazo Rojo Orgánico y Asqueroso */
         #crash-screen {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #600; /* Un rojo más oscuro y visceral */
-            color: #fff; z-index: 9999;
+            background: radial-gradient(circle, #8b0000 0%, #300000 70%, #1a0000 100%);
+            color: #ffcccc; z-index: 9999;
             flex-direction: column; justify-content: center; align-items: center;
             text-align: center; text-shadow: 3px 3px 0 #000; padding: 20px; box-sizing: border-box;
             overflow: hidden;
-        }
-        #crash-screen h1 { 
-            font-size: 12vw; margin: 0; letter-spacing: 2px; line-height: 1; z-index: 10;
-        }
-        #crash-screen p { 
-            font-size: 5vw; margin-top: 15px; font-weight: bold; z-index: 10;
+            animation: flash-strobe 0.15s infinite; /* Efecto estroboscópico de susto al entrar */
         }
 
-        /* Estilo base de los gusanos */
+        @keyframes flash-strobe {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(2.2) contrast(2); background-color: #ff0000; }
+            100% { filter: brightness(1); }
+        }
+
+        #crash-screen h1 { 
+            font-size: 11vw; margin: 0; letter-spacing: 2px; line-height: 1; z-index: 10; color: #fff;
+            animation: pulse-text 0.4s infinite alternate;
+        }
+        @keyframes pulse-text {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.06); }
+        }
+
+        #crash-screen p { 
+            font-size: 4.5vw; margin-top: 15px; font-weight: bold; z-index: 10; color: #ff9999;
+        }
+
+        /* Gusanos blandos con animación orgánica */
         .worm {
             position: absolute;
             pointer-events: none;
             z-index: 5;
-            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.8));
-            /* Animación CSS para que parezca que se estiran y encogen al reptar */
-            animation: squirm 1.5s infinite alternate ease-in-out; 
-            transition: left 0.8s ease-in-out, top 0.8s ease-in-out, transform 0.4s ease;
+            filter: drop-shadow(2px 3px 5px rgba(0,0,0,0.9));
+            animation: squirm 1.2s infinite alternate ease-in-out; 
+            transition: left 0.6s ease-in-out, top 0.6s ease-in-out, transform 0.3s ease;
         }
 
         @keyframes squirm {
             0% { transform: scaleX(1) scaleY(1) rotate(var(--rot)); }
-            50% { transform: scaleX(1.3) scaleY(0.7) rotate(var(--rot)); }
-            100% { transform: scaleX(0.9) scaleY(1.1) rotate(var(--rot)); }
+            50% { transform: scaleX(1.4) scaleY(0.6) rotate(var(--rot)); }
+            100% { transform: scaleX(0.8) scaleY(1.2) rotate(var(--rot)); }
         }
 
-        /* Temblor */
-        .shake-hard { animation: shake-hard 0.2s infinite; }
+        .shake-hard { animation: shake-hard 0.15s infinite; }
         @keyframes shake-hard {
-            0% { transform: translate(5px, 5px) rotate(0deg); }
-            10% { transform: translate(-5px, -2px) rotate(-1deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            30% { transform: translate(3px, 2px) rotate(0deg); }
-            40% { transform: translate(1px, -1px) rotate(1deg); }
-            50% { transform: translate(-1px, 2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 1px) rotate(0deg); }
-            70% { transform: translate(3px, 1px) rotate(-1deg); }
-            80% { transform: translate(-1px, -1px) rotate(1deg); }
-            90% { transform: translate(1px, 2px) rotate(0deg); }
-            100% { transform: translate(1px, -2px) rotate(-1deg); }
+            0% { transform: translate(6px, 6px) rotate(0deg); }
+            20% { transform: translate(-6px, -4px) rotate(-2deg); }
+            40% { transform: translate(-4px, 2px) rotate(2deg); }
+            60% { transform: translate(4px, -2px) rotate(0deg); }
+            80% { transform: translate(-2px, 4px) rotate(-1deg); }
+            100% { transform: translate(2px, -4px) rotate(1deg); }
         }
     </style>
 </head>
@@ -94,8 +101,8 @@
     <div id="terminal"></div>
 
     <div id="crash-screen">
-        <h1>ACCESS DENIED</h1>
-        <p>FATAL EXCEPTION // HOST DISCONNECTED</p>
+        <h1>INFESTATION</h1>
+        <p>SYSTEM CORRUPTION // HOST ROTTEN</p>
     </div>
 
     <script>
@@ -193,51 +200,45 @@
                 const gainNode = audioCtx.createGain();
 
                 oscillator.type = 'sawtooth'; 
-                oscillator.frequency.setValueAtTime(120, audioCtx.currentTime); // Más grave
-                oscillator.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 1.2);
+                oscillator.frequency.setValueAtTime(100, audioCtx.currentTime); 
+                oscillator.frequency.exponentialRampToValueAtTime(20, audioCtx.currentTime + 1.5);
 
                 gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.2);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.5);
 
                 oscillator.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
 
                 oscillator.start();
-                oscillator.stop(audioCtx.currentTime + 1.5);
+                oscillator.stop(audioCtx.currentTime + 1.8);
             } catch (e) {}
         }
 
-        // --- SISTEMA DE GUSANOS REPTANDO ---
         function spawnWorms() {
-            const wormTypes = ['🪱', '🐛', '🦠', '🪱']; // Predominan los gusanos
+            const wormTypes = ['🪱', '🐛', '🦠', '🪱', '🧬']; 
             const crashScreen = document.getElementById('crash-screen');
-            const numWorms = 50; 
+            const numWorms = 65; // Más masa de bichos
 
             for (let i = 0; i < numWorms; i++) {
                 const worm = document.createElement('div');
                 worm.className = 'worm';
                 worm.innerText = wormTypes[Math.floor(Math.random() * wormTypes.length)];
                 
-                // Posición inicial
                 let x = Math.random() * window.innerWidth;
                 let y = Math.random() * window.innerHeight;
                 worm.style.left = x + 'px';
                 worm.style.top = y + 'px';
                 
-                // Tamaño grande y asqueroso
-                worm.style.fontSize = (Math.random() * 25 + 30) + 'px';
+                worm.style.fontSize = (Math.random() * 30 + 25) + 'px';
                 
-                // Ángulo inicial aleatorio
                 let angle = Math.random() * 360;
                 worm.style.setProperty('--rot', `${angle}deg`);
 
                 crashScreen.appendChild(worm);
 
-                // Movimiento errático y lento (reptando)
                 setInterval(() => {
-                    // Avanzan menos distancia en cada "estirón"
-                    let nextX = x + (Math.random() - 0.5) * 80;
-                    let nextY = y + (Math.random() - 0.5) * 80;
+                    let nextX = x + (Math.random() - 0.5) * 60;
+                    let nextY = y + (Math.random() - 0.5) * 60;
                     
                     if(nextX < -50) nextX = window.innerWidth + 50;
                     if(nextX > window.innerWidth + 50) nextX = -50;
@@ -248,12 +249,11 @@
                     
                     worm.style.left = nextX + 'px';
                     worm.style.top = nextY + 'px';
-                    // Actualizamos la variable CSS para que la animación de estiramiento (squirm) mantenga la rotación
                     worm.style.setProperty('--rot', `${newAngle}deg`);
                     
                     x = nextX;
                     y = nextY;
-                }, Math.random() * 800 + 600); // Se actualizan más lento para simular el reptar
+                }, Math.random() * 700 + 400);
             }
         }
 
@@ -261,13 +261,19 @@
             if (!trapReady) return;
             trapReady = false;
             
-            if (navigator.vibrate) navigator.vibrate([400, 200, 400, 200, 600]);
+            // Vibración larga y seca de alerta
+            if (navigator.vibrate) navigator.vibrate([500, 100, 500, 100, 800]);
             playErrorSound();
 
             document.body.classList.add('shake-hard');
             terminal.style.display = 'none';
             const crashScreen = document.getElementById('crash-screen');
             crashScreen.style.display = 'flex';
+
+            // Quitar el parpadeo estroboscópico fuerte a los 2 segundos para que no moleste de más, dejando solo los gusanos y el temblor
+            setTimeout(() => {
+                crashScreen.style.animation = 'none';
+            }, 2000);
 
             spawnWorms();
         }
