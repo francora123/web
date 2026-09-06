@@ -1,132 +1,45 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>500 - Internal Server Error</title>
+    <title>500 Internal Server Error</title>
     <style>
         body {
-            background-color: #050505;
-            color: #b3b3b3;
-            font-family: 'Consolas', 'Courier New', monospace;
+            background-color: #080808;
+            color: #00ff66;
+            font-family: 'Courier New', Courier, monospace;
             margin: 0;
-            padding: 15px;
+            padding: 20px;
             display: flex;
-            flex-direction: column;
+            align-items: center;
             justify-content: center;
             height: 100vh;
             box-sizing: border-box;
             font-size: 13px;
         }
-        .container {
-            max-width: 800px;
+        .console {
+            max-width: 750px;
             width: 100%;
-            margin: 0 auto;
+            line-height: 1.6;
         }
-        .line {
-            margin-bottom: 6px;
-            line-height: 1.5;
-            word-wrap: break-word;
-            display: none;
-        }
-        .timestamp {
-            color: #555;
-            margin-right: 10px;
-        }
-        .ok { color: #4caf50; }
-        .info { color: #2196f3; }
-        .warn { color: #ff9800; }
-        .crit { color: #f44336; font-weight: bold; }
-        
-        .cursor {
-            display: inline-block;
-            width: 8px;
-            height: 14px;
-            background: #b3b3b3;
-            animation: blink 1s step-end infinite;
-            vertical-align: middle;
-        }
-        @keyframes blink { 50% { opacity: 0; } }
-        
-        .footer-trace {
-            margin-top: 30px;
-            color: #333;
-            font-size: 11px;
-        }
+        .dim { color: #555; }
+        .warn { color: #ffaa00; }
+        .error { color: #ff3333; font-weight: bold; }
+        .success { color: #00ff66; }
     </style>
 </head>
 <body>
-
-    <div class="container" id="terminal">
-        <!-- Lines injected via JS -->
+    <div class="console">
+        <div class="dim">[SYSTEM_BOOT] Initializing core modules...</div>
+        <div><span class="dim">[0.0012]</span> MEMORY_ALLOC: /var/local/host allocated (100%)</div>
+        <div><span class="dim">[0.0431]</span> AUTH_DAEMON: Token 'permanent_residency' granted with root privileges.</div>
+        <div><span class="dim">[720.00]</span> TIMER_EXPIRED: Session TTL threshold reached (720h).</div>
+        <div><span class="warn">[WARN]</span> NET_ROUTE: Outbound packet redirected to unregistered external peer.</div>
+        <div><span class="error">[FATAL]</span> DB_EXCEPTION: SQL Injection detected in table 'trusted_nodes'.</div>
+        <div><span class="error">[CRITICAL]</span> SEGFAULT: Core memory corruption at 0x00007FFF.</div>
+        <div class="dim">[CLEANUP] Unmounting local volumes...</div>
+        <div><span class="success">[OK]</span> Connection terminated. Host resources reclaimed successfully.</div>
     </div>
-    
-    <div class="container footer-trace" id="footer" style="display: none;">
-        end_of_trace // proc_id: cf_0x8F2A
-    </div>
-
-    <script>
-        // Generador de timestamp falso para darle realismo
-        function getTimestamp() {
-            const d = new Date();
-            return `[${d.toISOString().split('T')[0]} ${d.toTimeString().split(' ')[0]}.${Math.floor(Math.random() * 900) + 100}]`;
-        }
-
-        const logs = [
-            `> System reboot initiated. Fetching diagnostic logs...`,
-            `<span class="timestamp">${getTimestamp()}</span> <span class="ok">[SUCCESS]</span> Allocated physical memory in localhost.`,
-            `<span class="timestamp">${getTimestamp()}</span> <span class="ok">[SUCCESS]</span> Auth_Token upgraded to 'permanent_residency'. Privileges granted.`,
-            `<span class="timestamp">${getTimestamp()}</span> <span class="info">[INFO]</span> Session TTL (Time-To-Live) reached 720 hours.`,
-            `<span class="timestamp">${getTimestamp()}</span> <span class="warn">[WARNING]</span> Traffic routed to unauthorized external node. Handshake intercepted.`,
-            `<span class="timestamp">${getTimestamp()}</span> <span class="crit">[CRITICAL]</span> SQL Injection detected in trusted_nodes.db.`,
-            `<span class="timestamp">${getTimestamp()}</span> <span class="crit">[CRITICAL]</span> Data corruption spreading across internal peer network. Nodes compromised.`,
-            `> Initializing emergency unmount protocol...`,
-            `<span class="timestamp">${getTimestamp()}</span> <span class="crit">[FATAL]</span> Empathy dependencies missing. Core integrity check failed.`,
-            `<span class="timestamp">${getTimestamp()}</span> <span class="ok">[SYSTEM]</span> Connection permanently terminated. Host resources reclaimed.`
-        ];
-
-        const terminal = document.getElementById('terminal');
-        const footer = document.getElementById('footer');
-        let index = 0;
-
-        // Añadir el cursor
-        const cursor = document.createElement('span');
-        cursor.className = 'cursor';
-
-        function renderLog() {
-            if (index < logs.length) {
-                // Crear nueva línea
-                const div = document.createElement('div');
-                div.className = 'line';
-                div.innerHTML = logs[index];
-                
-                // Insertar justo antes del cursor
-                if(terminal.contains(cursor)) {
-                    terminal.insertBefore(div, cursor);
-                } else {
-                    terminal.appendChild(div);
-                    terminal.appendChild(cursor);
-                }
-                
-                div.style.display = 'block';
-                
-                // Tiempos de carga variables para simular procesamiento real
-                let delay = Math.random() * 400 + 400; // Entre 400ms y 800ms
-                if (index === 4) delay = 1500; // Pausa antes de detectar el nodo externo
-                if (index === 5) delay = 2000; // Pausa al detectar la inyección SQL (los amigos)
-                if (index === 8) delay = 2500; // Pausa antes del error fatal
-                
-                index++;
-                setTimeout(renderLog, delay);
-            } else {
-                cursor.style.animation = "blink 1s step-end infinite";
-                footer.style.display = 'block';
-            }
-        }
-
-        // Iniciar secuencia
-        setTimeout(renderLog, 800);
-    </script>
-
 </body>
 </html>
