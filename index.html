@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ERR_CONNECTION_REFUSED</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
@@ -12,9 +12,10 @@
             background-color: #050505; color: #0f0;
             font-family: 'Share Tech Mono', monospace;
             overflow: hidden; user-select: none;
+            touch-action: none; /* Bloquea gestos de recargar en móvil */
+            word-wrap: break-word; /* Evita que el texto se salga de la pantalla */
         }
 
-        /* CRT Effect */
         .crt::before {
             content: " "; display: block; position: absolute;
             top: 0; left: 0; bottom: 0; right: 0;
@@ -23,37 +24,42 @@
         }
 
         #terminal {
-            position: relative; padding: 2rem; height: 100%;
-            box-sizing: border-box; z-index: 1; font-size: 14px;
-            line-height: 1.6; text-shadow: 0 0 5px #0f0; overflow-y: hidden;
+            position: relative; padding: 1.5rem; height: 100%;
+            box-sizing: border-box; z-index: 1; font-size: 13px;
+            line-height: 1.5; text-shadow: 0 0 5px #0f0; overflow-y: hidden;
         }
 
-        .line { margin-bottom: 5px; }
+        .line { margin-bottom: 6px; }
         .sys { color: #888; }
         .ok { color: #0f0; }
         .warn { color: #ff0; text-shadow: 0 0 5px #ff0; }
         .err { color: #f00; text-shadow: 0 0 5px #f00; }
+        .prompt { color: #fff; text-shadow: 0 0 8px #fff; font-weight: bold; }
         
-        .cursor { display: inline-block; width: 8px; height: 15px; background: #0f0; animation: blink 1s step-end infinite; }
+        .cursor { display: inline-block; width: 8px; height: 14px; background: #0f0; animation: blink 1s step-end infinite; vertical-align: middle; }
         @keyframes blink { 50% { opacity: 0; } }
 
-        /* Fullscreen Red Crash */
+        /* Pantallazo Rojo 100% adaptado a móvil */
         #crash-screen {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #d40000; color: #fff; z-index: 9999;
             flex-direction: column; justify-content: center; align-items: center;
-            text-shadow: 2px 2px 0 #000;
+            text-align: center; text-shadow: 2px 2px 0 #000; padding: 20px; box-sizing: border-box;
         }
-        #crash-screen h1 { font-size: 3rem; margin: 0; letter-spacing: 5px; }
-        #crash-screen p { font-size: 1.2rem; }
+        #crash-screen h1 { 
+            font-size: 10vw; /* Se ajusta al ancho de la pantalla */
+            margin: 0; letter-spacing: 2px; line-height: 1.1; 
+        }
+        #crash-screen p { 
+            font-size: 4.5vw; margin-top: 15px; opacity: 0.9;
+        }
 
-        /* Shake animation */
-        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        .shake { animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake {
-            10%, 90% { transform: translate3d(-4px, 0, 0); }
-            20%, 80% { transform: translate3d(4px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
-            40%, 60% { transform: translate3d(8px, 0, 0); }
+            10%, 90% { transform: translate3d(-3px, 0, 0); }
+            20%, 80% { transform: translate3d(3px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+            40%, 60% { transform: translate3d(6px, 0, 0); }
         }
     </style>
 </head>
@@ -76,21 +82,21 @@
         const logs = [
             { type: 'sys', text: 'INIT: Bootstrapping host environment...' },
             { type: 'ok',  text: 'VFS_ALLOC: Local physical volumes mounted. (100%)' },
-            { type: 'ok',  text: 'AUTH: Privileges escalated. Token upgraded to [PERMANENT_RESIDENCY].' },
-            { type: 'warn',text: 'SYS_TICK: Session TTL threshold reached (720h). Connection unstable.' },
-            { type: 'warn',text: 'NET_ROUTE: Outbound traffic rerouted to untrusted external peer.' },
-            { type: 'err', text: 'SEC_ALARM: SQL Injection detected in subnet [trusted_nodes.db].' },
-            { type: 'err', text: 'KERNEL_PANIC: Core integrity failed. Dependencies missing in empath.so.' }
+            { type: 'ok',  text: 'AUTH: Privileges escalated. Token -> [PERMANENT_RESIDENCY].' },
+            { type: 'warn',text: 'SYS_TICK: Session TTL threshold reached (720h).' },
+            { type: 'warn',text: 'NET_ROUTE: Traffic rerouted to untrusted external peer.' },
+            { type: 'err', text: 'SEC_ALARM: SQL Injection detected in [trusted_nodes.db].' },
+            { type: 'err', text: 'KERNEL_PANIC: Core failed. Dependencies missing in empath.so.' }
         ];
 
         const purgeFiles = [
-            '/sys/loyalty/module.bin', '/cache/shared_mem.tmp', 
-            '/var/trust_nodes.bak', '/usr/bin/empathy_daemon', '/root/future_plans.dat'
+            '/sys/loyalty.bin', '/cache/mem.tmp', 
+            '/var/trust.bak', '/usr/bin/empathy', '/root/future.dat'
         ];
 
         let logIndex = 0;
 
-        // 1. Efecto de decodificación de texto
+        // Decodificación acelerada
         function decodeText(element, realText, callback) {
             let iterations = 0;
             const interval = setInterval(() => {
@@ -102,13 +108,12 @@
                 
                 if (iterations >= realText.length) {
                     clearInterval(interval);
-                    setTimeout(callback, 800); // Pausa antes de la siguiente línea
+                    setTimeout(callback, 150); // Pausa súper corta
                 }
-                iterations += 1/2; // Velocidad de decodificación
-            }, 25);
+                iterations += 1.5; // Velocidad x2
+            }, 15);
         }
 
-        // Ejecutar los logs iniciales
         function processLogs() {
             if (logIndex < logs.length) {
                 const div = document.createElement('div');
@@ -129,11 +134,11 @@
                 decodeText(msg, logs[logIndex].text, processLogs);
                 logIndex++;
             } else {
-                setTimeout(startPurge, 1000);
+                setTimeout(startPurge, 300);
             }
         }
 
-        // 2. Efecto de borrado masivo (rm -rf)
+        // Purga a máxima velocidad
         function startPurge() {
             const warning = document.createElement('div');
             warning.className = 'line err';
@@ -150,46 +155,43 @@
                     purgeIndex++;
                 } else {
                     clearInterval(purgeInterval);
-                    setTimeout(showInputTrap, 1000);
+                    setTimeout(showInputTrap, 400);
                 }
-            }, 150); // Muy rápido
+            }, 60); // Casi instantáneo
         }
 
-        // 3. Trampa de Input
         let trapReady = false;
         function showInputTrap() {
             const promptDiv = document.createElement('div');
-            promptDiv.className = 'line ok';
-            promptDiv.innerHTML = '<br>> SYSTEM LOCKED. RECONNECTION ATTEMPT.<br>> Enter Root Password: ';
+            promptDiv.className = 'line prompt';
+            promptDiv.innerHTML = '<br>> SYSTEM LOCKED.<br>> Tap screen to enter Root Password: ';
             terminal.insertBefore(promptDiv, cursor);
             trapReady = true;
         }
 
-        // 4. Pantallazo Rojo y Vibración
-        function triggerCrash() {
+        function triggerCrash(e) {
             if (!trapReady) return;
-            trapReady = false; // Evitar que se ejecute dos veces
-
-            // Vibración (funciona en Android)
+            trapReady = false;
+            
+            // Si el móvil lo soporta, vibra
             if (navigator.vibrate) {
-                navigator.vibrate([200, 100, 200, 100, 500]);
+                navigator.vibrate([200, 50, 200, 50, 400]);
             }
 
-            // CSS Shake
             document.body.classList.add('shake');
-
-            // Pantallazo rojo
+            
+            // Borra la consola visualmente y muestra la pantalla roja
+            terminal.style.display = 'none';
             const crashScreen = document.getElementById('crash-screen');
             crashScreen.style.display = 'flex';
         }
 
-        // Escuchar toques en la pantalla o teclas
-        window.addEventListener('keydown', triggerCrash);
-        window.addEventListener('touchstart', triggerCrash);
+        // Detecta toques en cualquier parte de la pantalla
+        window.addEventListener('touchstart', triggerCrash, {passive: false});
         window.addEventListener('click', triggerCrash);
+        window.addEventListener('keydown', triggerCrash);
 
-        // Iniciar secuencia al cargar
-        setTimeout(processLogs, 500);
+        setTimeout(processLogs, 300);
 
     </script>
 </body>
