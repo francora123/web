@@ -39,59 +39,62 @@
         .cursor { display: inline-block; width: 8px; height: 14px; background: #0f0; animation: blink 1s step-end infinite; vertical-align: middle; }
         @keyframes blink { 50% { opacity: 0; } }
 
-        /* Pantalla de Error Roja/Negra Original */
+        /* Pantallazo de alto contraste y colores molestos (Rojo tóxico y Verde estridente) */
         #crash-screen {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000000; color: #ff0000; z-index: 9999;
+            background: #ff0000; color: #00ff00; z-index: 9999;
             flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; text-shadow: 0px 0px 15px #f00; padding: 20px; box-sizing: border-box;
+            text-align: center; text-shadow: 3px 3px 0 #000; padding: 20px; box-sizing: border-box;
             overflow: hidden;
         }
         
         #crash-screen h1 {
-            font-size: 10vw; margin: 0; letter-spacing: 2px; line-height: 1; z-index: 10;
+            font-size: 12vw; margin: 0; letter-spacing: 2px; line-height: 1; z-index: 10;
         }
         
         #crash-screen p {
-            font-size: 4vw; margin-top: 15px; font-weight: bold; z-index: 10; color: #fff;
+            font-size: 5vw; margin-top: 15px; font-weight: bold; z-index: 10; color: #ffff00;
         }
 
-        /* Flash rojo */
         #flash-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #ff0000; z-index: 10000; pointer-events: none;
+            background: #00ff00; z-index: 10000; pointer-events: none;
         }
 
-        /* Glitch Rojo Violento */
+        /* Ciclo de colores ultra-estridente y molesto a ~20 Hz */
         .color-invert-glitch {
-            animation: glitch-invert 0.08s infinite, hard-shake 0.1s infinite;
+            animation: glitch-invert 0.05s infinite, hard-shake 0.2s infinite;
         }
 
         @keyframes glitch-invert {
             0%, 49% { 
-                background-color: #000; 
-                color: #f00; 
+                background-color: #ff0000; 
+                color: #00ff00; 
+                -webkit-filter: invert(0) hue-rotate(0deg) contrast(300%); 
+                filter: invert(0) hue-rotate(0deg) contrast(300%); 
             }
             50%, 100% { 
-                background-color: #f00; 
-                color: #000; 
+                background-color: #000000; 
+                color: #ff00ff; 
+                -webkit-filter: invert(1) hue-rotate(270deg) contrast(300%); 
+                filter: invert(1) hue-rotate(270deg) contrast(300%); 
             }
         }
 
         @keyframes hard-shake {
-            0% { transform: translate(8px, 8px) rotate(0deg); }
-            20% { transform: translate(-8px, -4px) rotate(-2deg); }
-            40% { transform: translate(-5px, 0px) rotate(2deg); }
-            60% { transform: translate(5px, 4px) rotate(0deg); }
-            80% { transform: translate(-3px, -3px) rotate(3deg); }
-            100% { transform: translate(3px, -4px) rotate(-2deg); }
+            0% { transform: translate(6px, 6px) rotate(0deg); }
+            20% { transform: translate(-6px, -3px) rotate(-2deg); }
+            40% { transform: translate(-4px, 0px) rotate(2deg); }
+            60% { transform: translate(4px, 3px) rotate(0deg); }
+            80% { transform: translate(-2px, -2px) rotate(2deg); }
+            100% { transform: translate(2px, -3px) rotate(-1deg); }
         }
 
         .bug {
             position: absolute;
             pointer-events: none;
             z-index: 5;
-            filter: drop-shadow(2px 4px 2px rgba(255,0,0,0.8));
+            filter: drop-shadow(2px 4px 2px rgba(0,0,0,0.5));
             transition: left 0.4s linear, top 0.4s linear, transform 0.15s ease;
         }
     </style>
@@ -102,8 +105,8 @@
     <div id="flash-overlay"></div>
 
     <div id="crash-screen">
-        <h1>[ KERNEL PANIC ]</h1>
-        <p>SYSTEM CORRUPTION DETECTED // MEMORY DUMP FAILED</p>
+        <h1>ACCESS DENIED</h1>
+        <p>FATAL EXCEPTION // HOST DISCONNECTED</p>
     </div>
 
     <script>
@@ -210,7 +213,7 @@
             trapReady = true;
         }
 
-        // --- AUDIO CONSTANTE Y MOLESTO ---
+        /* --- NUEVO SISTEMA DE AUDIO (Extremadamente fuerte, infinito y distorsionado) --- */
         function playErrorSound() {
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -218,40 +221,40 @@
                 const fire = () => {
                     const now = audioCtx.currentTime;
                     
-                    // Oscilador 1: Onda cuadrada muy aguda (estridente)
+                    // Nodo de ganancia maestro súper saturado (crea distorsión a propósito)
+                    const masterGain = audioCtx.createGain();
+                    masterGain.gain.setValueAtTime(4.0, now); // Volúmen exagerado forzado
+                    masterGain.connect(audioCtx.destination);
+
+                    // Onda Cuadrada 1: Altísima frecuencia (donde el oído es más sensible)
                     const osc1 = audioCtx.createOscillator();
-                    const gain1 = audioCtx.createGain();
                     osc1.type = 'square';
-                    osc1.frequency.setValueAtTime(1200, now);
-                    
-                    // Oscilador 2: Onda de sierra ligeramente desfasada (crea vibración incómoda)
+                    osc1.frequency.setValueAtTime(2500, now);
+
+                    // Onda de Sierra 2: Desafinada para crear disonancia dolorosa
                     const osc2 = audioCtx.createOscillator();
-                    const gain2 = audioCtx.createGain();
                     osc2.type = 'sawtooth';
-                    osc2.frequency.setValueAtTime(1225, now); 
-                    
-                    // Oscilador 3: Sonido grave eléctrico
-                    const osc3 = audioCtx.createOscillator();
-                    const gain3 = audioCtx.createGain();
-                    osc3.type = 'square';
-                    osc3.frequency.setValueAtTime(60, now);
+                    osc2.frequency.setValueAtTime(2650, now);
 
-                    // Volumen máximo 
-                    gain1.gain.value = 1;
-                    gain2.gain.value = 1;
-                    gain3.gain.value = 1;
+                    // LFO: Modulador para crear el efecto vibrante de "alarma descontrolada"
+                    const lfo = audioCtx.createOscillator();
+                    lfo.type = 'square';
+                    lfo.frequency.setValueAtTime(15, now); // Modulación brutal a 15 hz
 
-                    // Conectar y reproducir
-                    osc1.connect(gain1).connect(audioCtx.destination);
-                    osc2.connect(gain2).connect(audioCtx.destination);
-                    osc3.connect(gain3).connect(audioCtx.destination);
+                    const lfoGain = audioCtx.createGain();
+                    lfoGain.gain.setValueAtTime(1000, now); // Rango de variación enorme
 
+                    lfo.connect(lfoGain);
+                    lfoGain.connect(osc1.frequency);
+                    lfoGain.connect(osc2.frequency);
+
+                    osc1.connect(masterGain);
+                    osc2.connect(masterGain);
+
+                    // Inicia el audio sin un "stop" programado (sonido continuo infinito)
                     osc1.start(now);
                     osc2.start(now);
-                    osc3.start(now);
-
-                    // A diferencia de la versión anterior, AQUÍ NO HAY ".stop()".
-                    // Seguirá sonando hasta que se cierre la pestaña.
+                    lfo.start(now);
                 };
 
                 if (audioCtx.state === 'suspended') {
@@ -264,10 +267,7 @@
 
         function playVibration() {
             if (!navigator.vibrate) return;
-            // Intenta vibrar indefinidamente
-            setInterval(() => {
-                navigator.vibrate([400, 100, 400, 100, 800, 200]);
-            }, 2000);
+            navigator.vibrate([300, 100, 300, 100, 500, 150, 200, 150, 700]);
         }
 
         function spawnBugs() {
@@ -311,7 +311,7 @@
 
         function triggerCrash(e) {
             if (!trapReady) return;
-            trapReady = false;
+            trapReady = false; // Asegurarse de que no se llame varias veces y se sature de más
 
             playVibration();
             playErrorSound();
