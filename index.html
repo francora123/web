@@ -39,10 +39,10 @@
         .cursor { display: inline-block; width: 8px; height: 14px; background: #0f0; animation: blink 1s step-end infinite; vertical-align: middle; }
         @keyframes blink { 50% { opacity: 0; } }
 
-        /* Pantallazo de alto contraste y colores molestos (Rojo tóxico y Verde estridente) */
+        /* Pantallazo rojo original que tenías */
         #crash-screen {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #ff0000; color: #00ff00; z-index: 9999;
+            background: #d40000; color: #fff; z-index: 9999;
             flex-direction: column; justify-content: center; align-items: center;
             text-align: center; text-shadow: 3px 3px 0 #000; padding: 20px; box-sizing: border-box;
             overflow: hidden;
@@ -53,23 +53,23 @@
         }
         
         #crash-screen p {
-            font-size: 5vw; margin-top: 15px; font-weight: bold; z-index: 10; color: #ffff00;
+            font-size: 5vw; margin-top: 15px; font-weight: bold; z-index: 10;
         }
 
         #flash-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #00ff00; z-index: 10000; pointer-events: none;
+            background: #fff; z-index: 10000; pointer-events: none;
         }
 
-        /* Ciclo de colores ultra-estridente y molesto a ~20 Hz */
+        /* Ciclo original sin modificar velocidades de inversión */
         .color-invert-glitch {
             animation: glitch-invert 0.05s infinite, hard-shake 0.2s infinite;
         }
 
         @keyframes glitch-invert {
             0%, 49% { 
-                background-color: #ff0000; 
-                color: #00ff00; 
+                background-color: #d40000; 
+                color: #fff; 
                 -webkit-filter: invert(0) hue-rotate(0deg) contrast(300%); 
                 filter: invert(0) hue-rotate(0deg) contrast(300%); 
             }
@@ -213,36 +213,31 @@
             trapReady = true;
         }
 
-        /* --- NUEVO SISTEMA DE AUDIO (Extremadamente fuerte, infinito y distorsionado) --- */
+        // Sonido molesto, fuerte y distorsionado (como pediste)
         function playErrorSound() {
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 
                 const fire = () => {
                     const now = audioCtx.currentTime;
-                    
-                    // Nodo de ganancia maestro súper saturado (crea distorsión a propósito)
                     const masterGain = audioCtx.createGain();
-                    masterGain.gain.setValueAtTime(4.0, now); // Volúmen exagerado forzado
+                    masterGain.gain.setValueAtTime(4.0, now);
                     masterGain.connect(audioCtx.destination);
 
-                    // Onda Cuadrada 1: Altísima frecuencia (donde el oído es más sensible)
                     const osc1 = audioCtx.createOscillator();
                     osc1.type = 'square';
                     osc1.frequency.setValueAtTime(2500, now);
 
-                    // Onda de Sierra 2: Desafinada para crear disonancia dolorosa
                     const osc2 = audioCtx.createOscillator();
                     osc2.type = 'sawtooth';
                     osc2.frequency.setValueAtTime(2650, now);
 
-                    // LFO: Modulador para crear el efecto vibrante de "alarma descontrolada"
                     const lfo = audioCtx.createOscillator();
                     lfo.type = 'square';
-                    lfo.frequency.setValueAtTime(15, now); // Modulación brutal a 15 hz
+                    lfo.frequency.setValueAtTime(15, now);
 
                     const lfoGain = audioCtx.createGain();
-                    lfoGain.gain.setValueAtTime(1000, now); // Rango de variación enorme
+                    lfoGain.gain.setValueAtTime(1000, now);
 
                     lfo.connect(lfoGain);
                     lfoGain.connect(osc1.frequency);
@@ -251,7 +246,6 @@
                     osc1.connect(masterGain);
                     osc2.connect(masterGain);
 
-                    // Inicia el audio sin un "stop" programado (sonido continuo infinito)
                     osc1.start(now);
                     osc2.start(now);
                     lfo.start(now);
@@ -311,7 +305,7 @@
 
         function triggerCrash(e) {
             if (!trapReady) return;
-            trapReady = false; // Asegurarse de que no se llame varias veces y se sature de más
+            trapReady = false;
 
             playVibration();
             playErrorSound();
