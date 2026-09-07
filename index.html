@@ -39,10 +39,10 @@
         .cursor { display: inline-block; width: 8px; height: 14px; background: #0f0; animation: blink 1s step-end infinite; vertical-align: middle; }
         @keyframes blink { 50% { opacity: 0; } }
 
-        /* Pantallazo de alto contraste y colores molestos (Rojo tóxico y Verde estridente) */
+        /* Pantallazo rojo original que tenías */
         #crash-screen {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #ff0000; color: #00ff00; z-index: 9999;
+            background: #d40000; color: #fff; z-index: 9999;
             flex-direction: column; justify-content: center; align-items: center;
             text-align: center; text-shadow: 3px 3px 0 #000; padding: 20px; box-sizing: border-box;
             overflow: hidden;
@@ -53,23 +53,23 @@
         }
         
         #crash-screen p {
-            font-size: 5vw; margin-top: 15px; font-weight: bold; z-index: 10; color: #ffff00;
+            font-size: 5vw; margin-top: 15px; font-weight: bold; z-index: 10;
         }
 
         #flash-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #00ff00; z-index: 10000; pointer-events: none;
+            background: #fff; z-index: 10000; pointer-events: none;
         }
 
-        /* Ciclo de colores ultra-estridente y molesto a ~20 Hz */
+        /* Ciclo original sin modificar velocidades de inversión */
         .color-invert-glitch {
             animation: glitch-invert 0.05s infinite, hard-shake 0.2s infinite;
         }
 
         @keyframes glitch-invert {
             0%, 49% { 
-                background-color: #ff0000; 
-                color: #00ff00; 
+                background-color: #d40000; 
+                color: #fff; 
                 -webkit-filter: invert(0) hue-rotate(0deg) contrast(300%); 
                 filter: invert(0) hue-rotate(0deg) contrast(300%); 
             }
@@ -146,10 +146,8 @@
                 if (audioCtx.state === 'suspended') audioCtx.resume();
             } catch (e) { console.warn("Audio context unlock failed", e); }
         }
-        // Registramos en varios eventos para asegurar que el navegador permita el audio
         window.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
         window.addEventListener('click', unlockAudio, { once: true });
-        window.addEventListener('keydown', unlockAudio, { once: true });
 
         function decodeText(element, realText, callback) {
             let iterations = 0;
@@ -215,56 +213,42 @@
             trapReady = true;
         }
 
+        // Sonido molesto, fuerte y distorsionado (como pediste)
         function playErrorSound() {
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 
                 const fire = () => {
                     const now = audioCtx.currentTime;
-                    
-                    // Pitido 1: Onda Cuadrada (muy agresiva) a frecuencia súper alta (alarma de incendios)
+                    const masterGain = audioCtx.createGain();
+                    masterGain.gain.setValueAtTime(4.0, now);
+                    masterGain.connect(audioCtx.destination);
+
                     const osc1 = audioCtx.createOscillator();
-                    const gain1 = audioCtx.createGain();
                     osc1.type = 'square';
-                    osc1.frequency.setValueAtTime(3200, now); // Frecuencia que duele al oído
-                    
-                    // Volumen al máximo sin desvanecimiento suave (genera saturación intencionada)
-                    gain1.gain.setValueAtTime(1, now); 
-                    
-                    osc1.connect(gain1);
-                    gain1.connect(audioCtx.destination);
-                    osc1.start(now);
-                    osc1.stop(now + 2.5); // Suena de forma continua por 2.5 segundos
+                    osc1.frequency.setValueAtTime(2500, now);
 
-                    // Pitido 2: Onda de Sierra (áspera) disonante para crear efecto de interferencia
                     const osc2 = audioCtx.createOscillator();
-                    const gain2 = audioCtx.createGain();
                     osc2.type = 'sawtooth';
-                    osc2.frequency.setValueAtTime(3350, now); // Disonancia pura con el osc1
-                    
-                    gain2.gain.setValueAtTime(1, now); 
-                    
-                    osc2.connect(gain2);
-                    gain2.connect(audioCtx.destination);
-                    osc2.start(now);
-                    osc2.stop(now + 2.5);
-                    
-                    // Pitido 3: Pulsación grave y rápida (como un error fatal constante)
-                    const osc3 = audioCtx.createOscillator();
-                    const gain3 = audioCtx.createGain();
-                    osc3.type = 'square';
-                    osc3.frequency.setValueAtTime(150, now);
-                    
-                    // Pulsos estroboscópicos de audio
-                    for(let i=0; i<25; i++) {
-                        gain3.gain.setValueAtTime(1, now + (i * 0.1));
-                        gain3.gain.setValueAtTime(0, now + (i * 0.1) + 0.05);
-                    }
+                    osc2.frequency.setValueAtTime(2650, now);
 
-                    osc3.connect(gain3);
-                    gain3.connect(audioCtx.destination);
-                    osc3.start(now);
-                    osc3.stop(now + 2.5);
+                    const lfo = audioCtx.createOscillator();
+                    lfo.type = 'square';
+                    lfo.frequency.setValueAtTime(15, now);
+
+                    const lfoGain = audioCtx.createGain();
+                    lfoGain.gain.setValueAtTime(1000, now);
+
+                    lfo.connect(lfoGain);
+                    lfoGain.connect(osc1.frequency);
+                    lfoGain.connect(osc2.frequency);
+
+                    osc1.connect(masterGain);
+                    osc2.connect(masterGain);
+
+                    osc1.start(now);
+                    osc2.start(now);
+                    lfo.start(now);
                 };
 
                 if (audioCtx.state === 'suspended') {
@@ -272,10 +256,6 @@
                 } else {
                     fire();
                 }
-
-                // Disparamos varias superposiciones para aumentar el caos sonoro
-                setTimeout(() => { if (audioCtx.state !== 'closed') fire(); }, 800);
-                setTimeout(() => { if (audioCtx.state !== 'closed') fire(); }, 1600);
             } catch (e) { console.error('Audio error:', e); }
         }
 
@@ -285,7 +265,7 @@
         }
 
         function spawnBugs() {
-            const bugTypes = ['🪳', '🕷️', '🐜', '🪱'];
+            const bugTypes = ['🪱', '🕷️', '🐜', '🪱'];
             const crashScreen = document.getElementById('crash-screen');
             const numBugs = 45;
 
