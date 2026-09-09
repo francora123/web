@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -34,8 +34,17 @@
             position: relative; padding: 1.5rem; height: 100%;
             box-sizing: border-box; z-index: 1; 
             font-size: min(4vw, 15px);
-            line-height: 1.4; text-shadow: 0 0 5px var(--term-green); overflow-y: hidden;
+            line-height: 1.4; text-shadow: 0 0 5px var(--term-green); 
+            /* MODIFICADO: Permitir scroll y ocultar la barra */
+            overflow-y: auto; 
             white-space: pre-wrap;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE y Edge */
+        }
+        
+        /* Ocultar barra de scroll en Chrome, Safari y Opera */
+        #terminal::-webkit-scrollbar {
+            display: none;
         }
 
         .line { margin-bottom: 4px; }
@@ -107,7 +116,6 @@
 
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*<>';
 
-        // Bloque ASCII convertido en líneas secuenciales para que cargue como consola
         const headerLines = [
             { type: 'err', text: '==============================================' },
             { type: 'err', text: ' KERNEL PANIC: CACHE POISONING DETECTED' },
@@ -124,7 +132,6 @@
             { type: 'err', text: '==============================================\n' }
         ];
 
-        // Logs que continúan la secuencia
         const logs = [
             { type: 'sys', text: 'INIT: Allocating 100% core resources to [GUEST_NODE]...' },
             { type: 'ok',  text: 'STATUS: Uplink established. (Transmitted: MAX | Received: 0).' },
@@ -167,6 +174,9 @@
                     return chars[Math.floor(Math.random() * chars.length)];
                 }).join('');
 
+                // MODIFICADO: Hacer auto-scroll mientras escribe
+                terminal.scrollTop = terminal.scrollHeight;
+
                 if (iterations >= realText.length) {
                     clearInterval(interval);
                     setTimeout(callback, 150); 
@@ -181,7 +191,6 @@
                 const div = document.createElement('div');
                 div.className = `line ${item.type}`;
                 
-                // Si es una línea del sistema sin prefijo explícito, no añadimos [TIPO]
                 if (item.text.startsWith(' =') || item.text.startsWith(' >') || item.text.startsWith('   ')) {
                     div.innerHTML = `<span></span>`;
                 } else {
@@ -213,6 +222,10 @@
                     pDiv.className = 'line sys';
                     pDiv.innerText = `Deleting ${purgeFiles[purgeIndex]} ... [OK]`;
                     terminal.insertBefore(pDiv, cursor);
+                    
+                    // MODIFICADO: Auto-scroll en las líneas de borrado rápido
+                    terminal.scrollTop = terminal.scrollHeight;
+                    
                     purgeIndex++;
                 } else {
                     clearInterval(purgeInterval);
@@ -227,6 +240,10 @@
             promptDiv.className = 'line prompt';
             promptDiv.innerHTML = '<br>> SYSTEM LOCKED.<br>> Critical Error in module [RECIPROCITY_ENGINE].<br>> Environment purged. Node isolated.<br>> Tap screen to acknowledge wipe and disconnect forever: ';
             terminal.insertBefore(promptDiv, cursor);
+            
+            // MODIFICADO: Auto-scroll final
+            terminal.scrollTop = terminal.scrollHeight;
+            
             trapReady = true;
         }
 
