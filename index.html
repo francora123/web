@@ -7,9 +7,16 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
+        :root {
+            --term-green: #0f0;
+            --term-red: #f00;
+            --term-yellow: #ff0;
+            --bg-color: #050505;
+        }
+
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            background-color: #050505; color: #0f0;
+            background-color: var(--bg-color); color: var(--term-green);
             font-family: 'Share Tech Mono', monospace;
             overflow: hidden; user-select: none;
             touch-action: none;
@@ -26,58 +33,52 @@
         #terminal {
             position: relative; padding: 1.5rem; height: 100%;
             box-sizing: border-box; z-index: 1; 
-            font-size: 17px;
-            line-height: 1.5; text-shadow: 0 0 5px #0f0; overflow-y: hidden;
+            font-size: 16px;
+            line-height: 1.4; text-shadow: 0 0 5px var(--term-green); overflow-y: hidden;
+        }
+
+        /* Bloque ASCII ajustado para que no se deforme en móviles */
+        #ascii-header {
+            margin: 0 0 15px 0;
+            font-size: min(3.8vw, 15px);
+            color: var(--term-red);
+            text-shadow: 0 0 5px var(--term-red);
+            white-space: pre;
         }
 
         .line { margin-bottom: 6px; }
-        .sys { color: #888; }
-        .ok { color: #0f0; }
-        .warn { color: #ff0; text-shadow: 0 0 5px #ff0; }
-        .err { color: #f00; text-shadow: 0 0 5px #f00; }
+        .sys { color: #888; text-shadow: none; }
+        .ok { color: var(--term-green); }
+        .warn { color: var(--term-yellow); text-shadow: 0 0 5px var(--term-yellow); }
+        .err { color: var(--term-red); text-shadow: 0 0 5px var(--term-red); }
         .prompt { color: #fff; text-shadow: 0 0 8px #fff; font-weight: bold; }
 
-        .cursor { display: inline-block; width: 8px; height: 14px; background: #0f0; animation: blink 1s step-end infinite; vertical-align: middle; }
+        .cursor { display: inline-block; width: 8px; height: 15px; background: var(--term-green); animation: blink 1s step-end infinite; vertical-align: middle; margin-left: 2px;}
         @keyframes blink { 50% { opacity: 0; } }
 
         #crash-screen {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #ff0000; color: #00ff00; z-index: 9999;
+            background: var(--term-red); color: var(--term-green); z-index: 9999;
             flex-direction: column; justify-content: center; align-items: center;
             text-align: center; text-shadow: 3px 3px 0 #000; padding: 20px; box-sizing: border-box;
             overflow: hidden;
         }
         
-        #crash-screen h1 {
-            font-size: 12vw; margin: 0; letter-spacing: 2px; line-height: 1; z-index: 10;
-        }
-        
-        #crash-screen p {
-            font-size: 5vw; margin-top: 15px; font-weight: bold; z-index: 10; color: #ffff00;
-        }
+        #crash-screen h1 { font-size: 12vw; margin: 0; letter-spacing: 2px; line-height: 1; z-index: 10; }
+        #crash-screen p { font-size: 5vw; margin-top: 15px; font-weight: bold; z-index: 10; color: var(--term-yellow); }
 
         #flash-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #00ff00; z-index: 10000; pointer-events: none;
+            background: var(--term-green); z-index: 10000; pointer-events: none;
         }
 
-        .color-invert-glitch {
-            animation: glitch-invert 0.05s infinite, hard-shake 0.2s infinite;
+        @media (prefers-reduced-motion: no-preference) {
+            .color-invert-glitch { animation: glitch-invert 0.05s infinite, hard-shake 0.2s infinite; }
         }
 
         @keyframes glitch-invert {
-            0%, 49% { 
-                background-color: #ff0000; 
-                color: #00ff00; 
-                -webkit-filter: invert(0) hue-rotate(0deg) contrast(300%); 
-                filter: invert(0) hue-rotate(0deg) contrast(300%); 
-            }
-            50%, 100% { 
-                background-color: #000000; 
-                color: #ff00ff; 
-                -webkit-filter: invert(1) hue-rotate(270deg) contrast(300%); 
-                filter: invert(1) hue-rotate(270deg) contrast(300%); 
-            }
+            0%, 49% { background-color: var(--term-red); color: var(--term-green); filter: invert(0) hue-rotate(0deg) contrast(300%); }
+            50%, 100% { background-color: #000; color: #ff00ff; filter: invert(1) hue-rotate(270deg) contrast(300%); }
         }
 
         @keyframes hard-shake {
@@ -90,17 +91,31 @@
         }
 
         .bug {
-            position: absolute;
-            pointer-events: none;
-            z-index: 5;
+            position: absolute; pointer-events: none; z-index: 5;
             filter: drop-shadow(2px 4px 2px rgba(0,0,0,0.5));
-            transition: left 0.4s linear, top 0.4s linear, transform 0.15s ease;
+            will-change: transform;
         }
     </style>
 </head>
 <body class="crt">
 
-    <div id="terminal"></div>
+    <div id="terminal">
+        <pre id="ascii-header">
+==============================================
+ KERNEL PANIC: CACHE POISONING DETECTED
+==============================================
+ > Event trace:
+   1. Root access given to [guest_node].
+   2. Resource drain (Up: 100% | Dw: 0%).
+   3. [guest_node] ran packet_forgery.sys.
+   4. Forged data sent to all peer nodes.
+   5. Subnet trust matrix compromised.
+ > System Status:
+   - Adjacency table wiped by peer net.
+   - LOCAL_HOST segregated. Node isolated.
+==============================================</pre>
+    </div>
+    
     <div id="flash-overlay"></div>
 
     <div id="crash-screen">
@@ -115,23 +130,23 @@
 
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*<>';
 
+        // Logs traducidos al inglés técnico y adaptados al contexto
         const logs = [
             { type: 'sys', text: 'INIT: Bootstrapping host environment...' },
             { type: 'ok',  text: 'VFS_ALLOC: Local physical volumes mounted. (100%)' },
-            { type: 'ok',  text: 'AUTH: Privileges escalated. Token -> [PERMANENT_RESIDENCY].' },
-            { type: 'warn',text: 'SYS_TICK: Session TTL threshold reached (720h).' },
-            { type: 'warn',text: 'NET_ROUTE: Traffic rerouted to untrusted external peer.' },
+            { type: 'warn',text: 'SYS_TICK: Session TTL threshold reached.' },
+            { type: 'warn',text: 'NET_ROUTE: Connection to [PEER_NETWORK] blocked by external host.' },
             { type: 'err', text: 'SEC_ALARM: SQL Injection detected in [trusted_nodes.db].' },
-            { type: 'err', text: 'KERNEL_PANIC: Core failed. Dependencies missing in empath.so.' }
+            { type: 'err', text: 'KERNEL_PANIC: Core failed. Dependencies missing in root.' }
         ];
 
         const purgeFiles = [
-            '/sys/loyalty.bin',
             '/var/trust.bak',
+            '/sys/reciprocity.bin',
             '/usr/bin/empathy.so',
             '/root/future_plans.dat',
             '/usr/lib/patience_buffer.tmp',
-            '/usr/sbin/shutdown_personal_server.service'
+            '/usr/sbin/shutdown_local_node.service'
         ];
 
         let logIndex = 0;
@@ -160,7 +175,7 @@
 
                 if (iterations >= realText.length) {
                     clearInterval(interval);
-                    setTimeout(callback, 150);
+                    setTimeout(callback, 200); // Pausa ligeramente más larga entre líneas
                 }
                 iterations += 1.5;
             }, 15);
@@ -179,7 +194,7 @@
                 decodeText(div.childNodes[1], logs[logIndex].text, processLogs);
                 logIndex++;
             } else {
-                setTimeout(startPurge, 300);
+                setTimeout(startPurge, 800);
             }
         }
 
@@ -199,16 +214,17 @@
                     purgeIndex++;
                 } else {
                     clearInterval(purgeInterval);
-                    setTimeout(showInputTrap, 400);
+                    setTimeout(showInputTrap, 1500); // Pausa dramática antes del final
                 }
-            }, 60);
+            }, 80);
         }
 
         let trapReady = false;
         function showInputTrap() {
             const promptDiv = document.createElement('div');
             promptDiv.className = 'line prompt';
-            promptDiv.innerHTML = '<br>> SYSTEM LOCKED.<br>> Critical Error in module [RELATIONSHIP_MODULE].<br>> Tap screen to acknowledge wipe and disconnect forever: ';
+            // Mensaje final en inglés
+            promptDiv.innerHTML = '<br>> SYSTEM LOCKED.<br>> Critical Error in module [RECIPROCITY_ENGINE].<br>> Environment purged. Node isolated.<br>> Tap screen to acknowledge wipe and disconnect forever: ';
             terminal.insertBefore(promptDiv, cursor);
             trapReady = true;
         }
@@ -263,43 +279,58 @@
             navigator.vibrate([300, 100, 300, 100, 500, 150, 200, 150, 700]);
         }
 
+        // Sistema de partículas mejorado y agrupado para mayor rendimiento
         function spawnBugs() {
             const bugTypes = ['🪱', '🕷️', '🐜', '🪱'];
             const crashScreen = document.getElementById('crash-screen');
             const numBugs = 45;
+            const fragment = document.createDocumentFragment();
+            const bugs = [];
 
             for (let i = 0; i < numBugs; i++) {
                 const bug = document.createElement('div');
                 bug.className = 'bug';
                 bug.innerText = bugTypes[Math.floor(Math.random() * bugTypes.length)];
-
-                let x = Math.random() * window.innerWidth;
-                let y = Math.random() * window.innerHeight;
-                bug.style.left = x + 'px';
-                bug.style.top = y + 'px';
-
-                bug.style.fontSize = (Math.random() * 20 + 20) + 'px';
-                crashScreen.appendChild(bug);
-
-                setInterval(() => {
-                    let nextX = x + (Math.random() - 0.5) * 200;
-                    let nextY = y + (Math.random() - 0.5) * 200;
-
-                    if (nextX < -20) nextX = window.innerWidth + 20;
-                    if (nextX > window.innerWidth + 20) nextX = -20;
-                    if (nextY < -20) nextY = window.innerHeight + 20;
-                    if (nextY > window.innerHeight + 20) nextY = -20;
-
-                    let angle = Math.atan2(nextY - y, nextX - x) * (180 / Math.PI) + 90;
-
-                    bug.style.left = nextX + 'px';
-                    bug.style.top = nextY + 'px';
-                    bug.style.transform = `rotate(${angle}deg)`;
-
-                    x = nextX;
-                    y = nextY;
-                }, Math.random() * 300 + 200);
+                
+                const size = Math.random() * 20 + 20;
+                bug.style.fontSize = size + 'px';
+                
+                const data = {
+                    el: bug,
+                    x: Math.random() * window.innerWidth,
+                    y: Math.random() * window.innerHeight,
+                    targetX: 0, targetY: 0, angle: 0,
+                    speed: Math.random() * 2 + 1
+                };
+                
+                bug.style.transform = `translate(${data.x}px, ${data.y}px)`;
+                fragment.appendChild(bug);
+                bugs.push(data);
             }
+            
+            crashScreen.appendChild(fragment);
+
+            function updateBugs() {
+                bugs.forEach(b => {
+                    if (Math.abs(b.targetX - b.x) < 5 && Math.abs(b.targetY - b.y) < 5) {
+                        b.targetX = b.x + (Math.random() - 0.5) * 300;
+                        b.targetY = b.y + (Math.random() - 0.5) * 300;
+                        b.angle = Math.atan2(b.targetY - b.y, b.targetX - b.x) * (180 / Math.PI) + 90;
+                    }
+                    
+                    b.x += (b.targetX - b.x) * 0.05 * b.speed;
+                    b.y += (b.targetY - b.y) * 0.05 * b.speed;
+                    
+                    if (b.x < -50) b.x = window.innerWidth + 50;
+                    if (b.x > window.innerWidth + 50) b.x = -50;
+                    if (b.y < -50) b.y = window.innerHeight + 50;
+                    if (b.y > window.innerHeight + 50) b.y = -50;
+                    
+                    b.el.style.transform = `translate(${b.x}px, ${b.y}px) rotate(${b.angle}deg)`;
+                });
+                requestAnimationFrame(updateBugs);
+            }
+            requestAnimationFrame(updateBugs);
         }
 
         function triggerCrash(e) {
@@ -314,13 +345,11 @@
             
             setTimeout(() => { 
                 flash.style.display = 'none'; 
-                
                 document.body.classList.add('color-invert-glitch');
-                
                 terminal.style.display = 'none';
+                
                 const crashScreen = document.getElementById('crash-screen');
                 crashScreen.style.display = 'flex';
-                
                 spawnBugs();
             }, 100);
         }
@@ -329,7 +358,8 @@
         window.addEventListener('click', triggerCrash);
         window.addEventListener('keydown', triggerCrash);
 
-        setTimeout(processLogs, 300);
+        // Retraso inicial para dejar leer el encabezado
+        setTimeout(processLogs, 1200);
     </script>
 </body>
 </html>
