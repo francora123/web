@@ -35,17 +35,12 @@
             box-sizing: border-box; z-index: 1; 
             font-size: min(4vw, 15px);
             line-height: 1.4; text-shadow: 0 0 5px var(--term-green); 
-            /* MODIFICADO: Permitir scroll y ocultar la barra */
-            overflow-y: auto; 
-            white-space: pre-wrap;
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE y Edge */
+            overflow-y: auto; white-space: pre-wrap;
+            scrollbar-width: none; -ms-overflow-style: none;
+            display: block; 
         }
         
-        /* Ocultar barra de scroll en Chrome, Safari y Opera */
-        #terminal::-webkit-scrollbar {
-            display: none;
-        }
+        #terminal::-webkit-scrollbar { display: none; }
 
         .line { margin-bottom: 4px; }
         .sys { color: #888; text-shadow: none; }
@@ -73,9 +68,7 @@
             background: var(--term-green); z-index: 10000; pointer-events: none;
         }
 
-        @media (prefers-reduced-motion: no-preference) {
-            .color-invert-glitch { animation: glitch-invert 0.05s infinite, hard-shake 0.2s infinite; }
-        }
+        .color-invert-glitch { animation: glitch-invert 0.05s infinite, hard-shake 0.2s infinite; }
 
         @keyframes glitch-invert {
             0%, 49% { background-color: var(--term-red); color: var(--term-green); filter: invert(0) hue-rotate(0deg) contrast(300%); }
@@ -83,12 +76,12 @@
         }
 
         @keyframes hard-shake {
-            0% { transform: translate(6px, 6px) rotate(0deg); }
-            20% { transform: translate(-6px, -3px) rotate(-2deg); }
-            40% { transform: translate(-4px, 0px) rotate(2deg); }
-            60% { transform: translate(4px, 3px) rotate(0deg); }
-            80% { transform: translate(-2px, -2px) rotate(2deg); }
-            100% { transform: translate(2px, -3px) rotate(-1deg); }
+            0% { transform: translate(8px, 8px) rotate(0deg); }
+            20% { transform: translate(-8px, -4px) rotate(-3deg); }
+            40% { transform: translate(-5px, 0px) rotate(3deg); }
+            60% { transform: translate(5px, 4px) rotate(0deg); }
+            80% { transform: translate(-3px, -3px) rotate(3deg); }
+            100% { transform: translate(3px, -4px) rotate(-2deg); }
         }
 
         .bug {
@@ -101,7 +94,6 @@
 <body class="crt">
 
     <div id="terminal"></div>
-    
     <div id="flash-overlay"></div>
 
     <div id="crash-screen">
@@ -152,18 +144,29 @@
         let queue = [...headerLines, ...logs];
         let queueIndex = 0;
         let audioCtx = null;
+        let userInteracted = false;
 
-        function unlockAudio() {
-            if (audioCtx && audioCtx.state !== 'suspended') return;
+        // TOQUE OCULTO: Desbloquea permisos si el usuario toca la pantalla durante la animación
+        function unlockPermissions() {
+            if (userInteracted) return;
+            userInteracted = true;
+            
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 if (audioCtx.state === 'suspended') audioCtx.resume();
             } catch (e) { console.warn(e); }
+
+            if (navigator.vibrate) {
+                navigator.vibrate(10); 
+            }
         }
-        
-        window.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
-        window.addEventListener('click', unlockAudio, { once: true });
-        window.addEventListener('keydown', unlockAudio, { once: true });
+
+        window.addEventListener('touchstart', unlockPermissions, { once: true, passive: true });
+        window.addEventListener('click', unlockPermissions, { once: true });
+        window.addEventListener('keydown', unlockPermissions, { once: true });
+
+        // Iniciar directamente al cargar
+        setTimeout(processQueue, 500);
 
         function decodeText(element, realText, callback) {
             let iterations = 0;
@@ -174,14 +177,13 @@
                     return chars[Math.floor(Math.random() * chars.length)];
                 }).join('');
 
-                // MODIFICADO: Hacer auto-scroll mientras escribe
                 terminal.scrollTop = terminal.scrollHeight;
 
                 if (iterations >= realText.length) {
                     clearInterval(interval);
                     setTimeout(callback, 150); 
                 }
-                iterations += 2;
+                iterations += 3;
             }, 10);
         }
 
@@ -205,7 +207,7 @@
                 decodeText(targetSpan, item.text, processQueue);
                 queueIndex++;
             } else {
-                setTimeout(startPurge, 600);
+                setTimeout(startPurge, 400);
             }
         }
 
@@ -222,29 +224,13 @@
                     pDiv.className = 'line sys';
                     pDiv.innerText = `Deleting ${purgeFiles[purgeIndex]} ... [OK]`;
                     terminal.insertBefore(pDiv, cursor);
-                    
-                    // MODIFICADO: Auto-scroll en las líneas de borrado rápido
                     terminal.scrollTop = terminal.scrollHeight;
-                    
                     purgeIndex++;
                 } else {
                     clearInterval(purgeInterval);
-                    setTimeout(showInputTrap, 1200); 
+                    setTimeout(triggerCrashAutomatic, 1000); 
                 }
             }, 70);
-        }
-
-        let trapReady = false;
-        function showInputTrap() {
-            const promptDiv = document.createElement('div');
-            promptDiv.className = 'line prompt';
-            promptDiv.innerHTML = '<br>> SYSTEM LOCKED.<br>> Critical Error in module [RECIPROCITY_ENGINE].<br>> Environment purged. Node isolated.<br>> Tap screen to acknowledge wipe and disconnect forever: ';
-            terminal.insertBefore(promptDiv, cursor);
-            
-            // MODIFICADO: Auto-scroll final
-            terminal.scrollTop = terminal.scrollHeight;
-            
-            trapReady = true;
         }
 
         function playErrorSound() {
@@ -254,7 +240,7 @@
                 const fire = () => {
                     const now = audioCtx.currentTime;
                     const masterGain = audioCtx.createGain();
-                    masterGain.gain.setValueAtTime(4.0, now);
+                    masterGain.gain.setValueAtTime(5.0, now);
                     masterGain.connect(audioCtx.destination);
 
                     const osc1 = audioCtx.createOscillator();
@@ -267,10 +253,10 @@
 
                     const lfo = audioCtx.createOscillator();
                     lfo.type = 'square';
-                    lfo.frequency.setValueAtTime(15, now);
+                    lfo.frequency.setValueAtTime(20, now);
 
                     const lfoGain = audioCtx.createGain();
-                    lfoGain.gain.setValueAtTime(1000, now);
+                    lfoGain.gain.setValueAtTime(1500, now);
 
                     lfo.connect(lfoGain);
                     lfoGain.connect(osc1.frequency);
@@ -285,22 +271,26 @@
                 };
 
                 if (audioCtx.state === 'suspended') {
-                    audioCtx.resume().then(fire);
+                    audioCtx.resume().then(fire).catch(e => console.warn("Autoplay blocked"));
                 } else {
                     fire();
                 }
             } catch (e) { console.error(e); }
         }
 
-        function playVibration() {
+        function playAggressiveVibration() {
             if (!navigator.vibrate) return;
-            navigator.vibrate([300, 100, 300, 100, 500, 150, 200, 150, 700]);
+            try {
+                navigator.vibrate([1000, 200, 1000, 200, 1500, 100, 500, 100, 2000]);
+            } catch (e) {
+                console.warn('Vibration failed:', e);
+            }
         }
 
         function spawnBugs() {
             const bugTypes = ['🪱', '🕷️', '🐜', '🪱'];
             const crashScreen = document.getElementById('crash-screen');
-            const numBugs = 45;
+            const numBugs = 60;
             const fragment = document.createDocumentFragment();
             const bugs = [];
 
@@ -309,7 +299,7 @@
                 bug.className = 'bug';
                 bug.innerText = bugTypes[Math.floor(Math.random() * bugTypes.length)];
                 
-                const size = Math.random() * 20 + 20;
+                const size = Math.random() * 25 + 20;
                 bug.style.fontSize = size + 'px';
                 
                 const data = {
@@ -317,7 +307,7 @@
                     x: Math.random() * window.innerWidth,
                     y: Math.random() * window.innerHeight,
                     targetX: 0, targetY: 0, angle: 0,
-                    speed: Math.random() * 2 + 1
+                    speed: Math.random() * 3 + 1.5
                 };
                 
                 bug.style.transform = `translate(${data.x}px, ${data.y}px)`;
@@ -335,8 +325,8 @@
                         b.angle = Math.atan2(b.targetY - b.y, b.targetX - b.x) * (180 / Math.PI) + 90;
                     }
                     
-                    b.x += (b.targetX - b.x) * 0.05 * b.speed;
-                    b.y += (b.targetY - b.y) * 0.05 * b.speed;
+                    b.x += (b.targetX - b.x) * 0.08 * b.speed;
+                    b.y += (b.targetY - b.y) * 0.08 * b.speed;
                     
                     if (b.x < -50) b.x = window.innerWidth + 50;
                     if (b.x > window.innerWidth + 50) b.x = -50;
@@ -350,11 +340,8 @@
             requestAnimationFrame(updateBugs);
         }
 
-        function triggerCrash(e) {
-            if (!trapReady) return;
-            trapReady = false;
-
-            playVibration();
+        function triggerCrashAutomatic() {
+            playAggressiveVibration();
             playErrorSound();
 
             const flash = document.getElementById('flash-overlay');
@@ -370,13 +357,6 @@
                 spawnBugs();
             }, 100);
         }
-
-        window.addEventListener('touchstart', triggerCrash, { passive: false });
-        window.addEventListener('click', triggerCrash);
-        window.addEventListener('keydown', triggerCrash);
-
-        // Iniciar la secuencia de escritura automática
-        setTimeout(processQueue, 500);
     </script>
 </body>
 </html>
