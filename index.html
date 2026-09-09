@@ -26,7 +26,7 @@
         #terminal {
             position: relative; padding: 1.5rem; height: 100%;
             box-sizing: border-box; z-index: 1; 
-            font-size: 17px; /* Aumentado de 13px a 17px para mayor legibilidad */
+            font-size: 17px;
             line-height: 1.5; text-shadow: 0 0 5px #0f0; overflow-y: hidden;
         }
 
@@ -40,7 +40,6 @@
         .cursor { display: inline-block; width: 8px; height: 14px; background: #0f0; animation: blink 1s step-end infinite; vertical-align: middle; }
         @keyframes blink { 50% { opacity: 0; } }
 
-        /* Pantallazo de alto contraste y colores molestos (Rojo tóxico y Verde estridente) */
         #crash-screen {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #ff0000; color: #00ff00; z-index: 9999;
@@ -62,7 +61,6 @@
             background: #00ff00; z-index: 10000; pointer-events: none;
         }
 
-        /* Ciclo de colores ultra-estridente y molesto a ~20 Hz */
         .color-invert-glitch {
             animation: glitch-invert 0.05s infinite, hard-shake 0.2s infinite;
         }
@@ -127,7 +125,6 @@
             { type: 'err', text: 'KERNEL_PANIC: Core failed. Dependencies missing in empath.so.' }
         ];
 
-        // Indirectas mejoradas en los nombres de archivo
         const purgeFiles = [
             '/sys/loyalty.bin',
             '/var/trust.bak',
@@ -141,14 +138,9 @@
         let audioCtx = null;
 
         function unlockAudio() {
-            if (audioCtx) return;
+            if (audioCtx && audioCtx.state !== 'suspended') return;
             try {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                const buffer = audioCtx.createBuffer(1, 1, 22050);
-                const src = audioCtx.createBufferSource();
-                src.buffer = buffer;
-                src.connect(audioCtx.destination);
-                src.start(0);
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 if (audioCtx.state === 'suspended') audioCtx.resume();
             } catch (e) { console.warn(e); }
         }
@@ -216,7 +208,6 @@
         function showInputTrap() {
             const promptDiv = document.createElement('div');
             promptDiv.className = 'line prompt';
-            // Mensaje de la indirecta mucho más claro y legible por el tamaño de fuente
             promptDiv.innerHTML = '<br>> SYSTEM LOCKED.<br>> Critical Error in module [RELATIONSHIP_MODULE].<br>> Tap screen to acknowledge wipe and disconnect forever: ';
             terminal.insertBefore(promptDiv, cursor);
             trapReady = true;
