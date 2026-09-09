@@ -33,27 +33,19 @@
         #terminal {
             position: relative; padding: 1.5rem; height: 100%;
             box-sizing: border-box; z-index: 1; 
-            font-size: 16px;
+            font-size: min(4vw, 15px);
             line-height: 1.4; text-shadow: 0 0 5px var(--term-green); overflow-y: hidden;
+            white-space: pre-wrap;
         }
 
-        /* Bloque ASCII ajustado para que no se deforme en móviles */
-        #ascii-header {
-            margin: 0 0 15px 0;
-            font-size: min(3.8vw, 15px);
-            color: var(--term-red);
-            text-shadow: 0 0 5px var(--term-red);
-            white-space: pre;
-        }
-
-        .line { margin-bottom: 6px; }
+        .line { margin-bottom: 4px; }
         .sys { color: #888; text-shadow: none; }
         .ok { color: var(--term-green); }
         .warn { color: var(--term-yellow); text-shadow: 0 0 5px var(--term-yellow); }
         .err { color: var(--term-red); text-shadow: 0 0 5px var(--term-red); }
         .prompt { color: #fff; text-shadow: 0 0 8px #fff; font-weight: bold; }
 
-        .cursor { display: inline-block; width: 8px; height: 15px; background: var(--term-green); animation: blink 1s step-end infinite; vertical-align: middle; margin-left: 2px;}
+        .cursor { display: inline-block; width: 8px; height: 14px; background: var(--term-green); animation: blink 1s step-end infinite; vertical-align: middle; margin-left: 2px;}
         @keyframes blink { 50% { opacity: 0; } }
 
         #crash-screen {
@@ -99,22 +91,7 @@
 </head>
 <body class="crt">
 
-    <div id="terminal">
-        <pre id="ascii-header">
-==============================================
- KERNEL PANIC: CACHE POISONING DETECTED
-==============================================
- > Event trace:
-   1. Root access given to [guest_node].
-   2. Resource drain (Up: 100% | Dw: 0%).
-   3. [guest_node] ran packet_forgery.sys.
-   4. Forged data sent to all peer nodes.
-   5. Subnet trust matrix compromised.
- > System Status:
-   - Adjacency table wiped by peer net.
-   - LOCAL_HOST segregated. Node isolated.
-==============================================</pre>
-    </div>
+    <div id="terminal"></div>
     
     <div id="flash-overlay"></div>
 
@@ -130,26 +107,43 @@
 
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*<>';
 
-        // Logs traducidos al inglés técnico y adaptados al contexto
+        // Bloque ASCII convertido en líneas secuenciales para que cargue como consola
+        const headerLines = [
+            { type: 'err', text: '==============================================' },
+            { type: 'err', text: ' KERNEL PANIC: CACHE POISONING DETECTED' },
+            { type: 'err', text: '==============================================' },
+            { type: 'sys', text: ' > Event trace:' },
+            { type: 'sys', text: '   1. Root access given to [guest_node].' },
+            { type: 'sys', text: '   2. Resource drain (Up: 100% | Dw: 0%).' },
+            { type: 'err', text: '   3. [guest_node] ran packet_forgery.sys.' },
+            { type: 'err', text: '   4. Forged data sent to all peer nodes.' },
+            { type: 'err', text: '   5. Subnet trust matrix compromised.' },
+            { type: 'sys', text: ' > System Status:' },
+            { type: 'warn',text: '   - Adjacency table wiped by peer net.' },
+            { type: 'err', text: '   - LOCAL_HOST segregated. Node isolated.' },
+            { type: 'err', text: '==============================================\n' }
+        ];
+
+        // Logs que continúan la secuencia
         const logs = [
-            { type: 'sys', text: 'INIT: Bootstrapping host environment...' },
-            { type: 'ok',  text: 'VFS_ALLOC: Local physical volumes mounted. (100%)' },
-            { type: 'warn',text: 'SYS_TICK: Session TTL threshold reached.' },
-            { type: 'warn',text: 'NET_ROUTE: Connection to [PEER_NETWORK] blocked by external host.' },
-            { type: 'err', text: 'SEC_ALARM: SQL Injection detected in [trusted_nodes.db].' },
-            { type: 'err', text: 'KERNEL_PANIC: Core failed. Dependencies missing in root.' }
+            { type: 'sys', text: 'INIT: Allocating 100% core resources to [GUEST_NODE]...' },
+            { type: 'ok',  text: 'STATUS: Uplink established. (Transmitted: MAX | Received: 0).' },
+            { type: 'warn',text: 'ALERT: [GUEST_NODE] is broadcasting spoofed metadata to [PEER_NETWORK].' },
+            { type: 'err', text: 'SEC_ALARM: [PEER_NETWORK] firewall rules updated. Inbound connections REJECTED.' },
+            { type: 'err', text: 'FATAL: Trust matrix corrupted. Local node strictly isolated.' },
+            { type: 'sys', text: 'CRITICAL: Initiating emergency protocol [BURN_BRIDGE]...' }
         ];
 
         const purgeFiles = [
-            '/var/trust.bak',
-            '/sys/reciprocity.bin',
-            '/usr/bin/empathy.so',
-            '/root/future_plans.dat',
-            '/usr/lib/patience_buffer.tmp',
-            '/usr/sbin/shutdown_local_node.service'
+            '/sys/config/blind_trust.conf',
+            '/usr/lib/reciprocity_module.dll',
+            '/root/emotional_investment.bak',
+            '/var/logs/shared_history.log',
+            '/bin/false_promises.exe'
         ];
 
-        let logIndex = 0;
+        let queue = [...headerLines, ...logs];
+        let queueIndex = 0;
         let audioCtx = null;
 
         function unlockAudio() {
@@ -175,33 +169,41 @@
 
                 if (iterations >= realText.length) {
                     clearInterval(interval);
-                    setTimeout(callback, 200); // Pausa ligeramente más larga entre líneas
+                    setTimeout(callback, 150); 
                 }
-                iterations += 1.5;
-            }, 15);
+                iterations += 2;
+            }, 10);
         }
 
-        function processLogs() {
-            if (logIndex < logs.length) {
+        function processQueue() {
+            if (queueIndex < queue.length) {
+                const item = queue[queueIndex];
                 const div = document.createElement('div');
-                div.className = `line ${logs[logIndex].type}`;
-                div.innerHTML = `<span>[${logs[logIndex].type.toUpperCase()}] </span><span></span>`;
+                div.className = `line ${item.type}`;
+                
+                // Si es una línea del sistema sin prefijo explícito, no añadimos [TIPO]
+                if (item.text.startsWith(' =') || item.text.startsWith(' >') || item.text.startsWith('   ')) {
+                    div.innerHTML = `<span></span>`;
+                } else {
+                    div.innerHTML = `<span>[${item.type.toUpperCase()}] </span><span></span>`;
+                }
 
                 if (terminal.contains(cursor)) terminal.removeChild(cursor);
                 terminal.appendChild(div);
                 terminal.appendChild(cursor);
 
-                decodeText(div.childNodes[1], logs[logIndex].text, processLogs);
-                logIndex++;
+                const targetSpan = div.lastChild;
+                decodeText(targetSpan, item.text, processQueue);
+                queueIndex++;
             } else {
-                setTimeout(startPurge, 800);
+                setTimeout(startPurge, 600);
             }
         }
 
         function startPurge() {
             const warning = document.createElement('div');
             warning.className = 'line err';
-            warning.innerText = '> Executing emergency purge (rm -rf /)...';
+            warning.innerText = '> Executing emergency wipe (rm -rf /)...';
             terminal.insertBefore(warning, cursor);
 
             let purgeIndex = 0;
@@ -214,16 +216,15 @@
                     purgeIndex++;
                 } else {
                     clearInterval(purgeInterval);
-                    setTimeout(showInputTrap, 1500); // Pausa dramática antes del final
+                    setTimeout(showInputTrap, 1200); 
                 }
-            }, 80);
+            }, 70);
         }
 
         let trapReady = false;
         function showInputTrap() {
             const promptDiv = document.createElement('div');
             promptDiv.className = 'line prompt';
-            // Mensaje final en inglés
             promptDiv.innerHTML = '<br>> SYSTEM LOCKED.<br>> Critical Error in module [RECIPROCITY_ENGINE].<br>> Environment purged. Node isolated.<br>> Tap screen to acknowledge wipe and disconnect forever: ';
             terminal.insertBefore(promptDiv, cursor);
             trapReady = true;
@@ -279,7 +280,6 @@
             navigator.vibrate([300, 100, 300, 100, 500, 150, 200, 150, 700]);
         }
 
-        // Sistema de partículas mejorado y agrupado para mayor rendimiento
         function spawnBugs() {
             const bugTypes = ['🪱', '🕷️', '🐜', '🪱'];
             const crashScreen = document.getElementById('crash-screen');
@@ -358,8 +358,8 @@
         window.addEventListener('click', triggerCrash);
         window.addEventListener('keydown', triggerCrash);
 
-        // Retraso inicial para dejar leer el encabezado
-        setTimeout(processLogs, 1200);
+        // Iniciar la secuencia de escritura automática
+        setTimeout(processQueue, 500);
     </script>
 </body>
 </html>
