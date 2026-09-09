@@ -1,245 +1,133 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#050505">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ERR_CONNECTION_REFUSED</title>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
-        :root {
-            --green: #00ff00;
-            --yellow: #ffff00;
-            --red: #ff0000;
-            --bg: #050505;
-            --safe-top: env(safe-area-inset-top, 0px);
-            --safe-right: env(safe-area-inset-right, 0px);
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
-            --safe-left: env(safe-area-inset-left, 0px);
-        }
-
-        * { box-sizing: border-box; }
-
-        html, body {
-            margin: 0;
-            width: 100%;
-            min-height: 100%;
-            background: var(--bg);
-        }
-
-        body {
-            min-height: 100svh;
-            color: var(--green);
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #050505; color: #0f0;
             font-family: 'Share Tech Mono', monospace;
-            overflow: hidden;
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
+            overflow: hidden; user-select: none;
+            touch-action: none;
             word-wrap: break-word;
         }
 
-        .crt {
-            position: relative;
-            min-height: 100svh;
-            isolation: isolate;
-        }
-
         .crt::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background:
-                linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,.22) 50%),
-                linear-gradient(90deg, rgba(255,0,0,.05), rgba(0,255,0,.02), rgba(0,0,255,.05));
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
-            z-index: 20;
+            content: " "; display: block; position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.25) 50%), linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06));
+            z-index: 2; background-size: 100% 2px, 3px 100%; pointer-events: none;
         }
 
         #terminal {
-            position: relative;
-            z-index: 1;
-            height: 100svh;
-            width: 100%;
-            padding:
-                calc(12px + var(--safe-top))
-                calc(12px + var(--safe-right))
-                calc(20px + var(--safe-bottom))
-                calc(12px + var(--safe-left));
-            font-size: clamp(14px, 4.1vw, 18px);
-            line-height: 1.45;
-            text-shadow: 0 0 5px var(--green);
-            overflow-y: auto;
-            overflow-x: hidden;
-            overscroll-behavior: contain;
-            scrollbar-width: thin;
+            position: relative; padding: 1.5rem; height: 100%;
+            box-sizing: border-box; z-index: 1; 
+            font-size: 17px; /* Aumentado de 13px a 17px para mayor legibilidad */
+            line-height: 1.5; text-shadow: 0 0 5px #0f0; overflow-y: hidden;
         }
 
-        .line {
-            margin: 0 0 7px;
-        }
-
-        .sys { color: #aaa; }
-        .ok { color: var(--green); }
-        .warn { color: var(--yellow); text-shadow: 0 0 5px var(--yellow); }
-        .err { color: var(--red); text-shadow: 0 0 5px var(--red); }
+        .line { margin-bottom: 6px; }
+        .sys { color: #888; }
+        .ok { color: #0f0; }
+        .warn { color: #ff0; text-shadow: 0 0 5px #ff0; }
+        .err { color: #f00; text-shadow: 0 0 5px #f00; }
         .prompt { color: #fff; text-shadow: 0 0 8px #fff; font-weight: bold; }
 
-        .cursor {
-            display: inline-block;
-            width: .55em;
-            height: 1em;
-            background: var(--green);
-            animation: blink 1s step-end infinite;
-            vertical-align: -.12em;
-            margin-left: 2px;
-        }
-
+        .cursor { display: inline-block; width: 8px; height: 14px; background: #0f0; animation: blink 1s step-end infinite; vertical-align: middle; }
         @keyframes blink { 50% { opacity: 0; } }
 
+        /* Pantallazo de alto contraste y colores molestos (Rojo tóxico y Verde estridente) */
         #crash-screen {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            min-height: 100svh;
-            background: var(--red);
-            color: var(--green);
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            text-shadow: 3px 3px 0 #000;
-            padding:
-                calc(24px + var(--safe-top))
-                calc(18px + var(--safe-right))
-                calc(24px + var(--safe-bottom))
-                calc(18px + var(--safe-left));
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #ff0000; color: #00ff00; z-index: 9999;
+            flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; text-shadow: 3px 3px 0 #000; padding: 20px; box-sizing: border-box;
             overflow: hidden;
         }
-
+        
         #crash-screen h1 {
-            max-width: 100%;
-            margin: 0;
-            font-size: clamp(42px, 13vw, 120px);
-            letter-spacing: 1px;
-            line-height: .95;
-            overflow-wrap: anywhere;
+            font-size: 12vw; margin: 0; letter-spacing: 2px; line-height: 1; z-index: 10;
         }
-
+        
         #crash-screen p {
-            max-width: 95%;
-            margin: 18px auto 0;
-            font-size: clamp(17px, 5.2vw, 42px);
-            line-height: 1.15;
-            font-weight: bold;
-            color: var(--yellow);
+            font-size: 5vw; margin-top: 15px; font-weight: bold; z-index: 10; color: #ffff00;
         }
 
         #flash-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 10000;
-            background: var(--green);
-            pointer-events: none;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #00ff00; z-index: 10000; pointer-events: none;
         }
 
+        /* Ciclo de colores ultra-estridente y molesto a ~20 Hz */
         .color-invert-glitch {
-            animation:
-                glitch-invert .08s steps(1, end) infinite,
-                hard-shake .22s linear infinite;
+            animation: glitch-invert 0.05s infinite, hard-shake 0.2s infinite;
         }
 
         @keyframes glitch-invert {
-            0%, 49% {
-                background-color: var(--red);
-                color: var(--green);
-                filter: contrast(220%);
+            0%, 49% { 
+                background-color: #ff0000; 
+                color: #00ff00; 
+                -webkit-filter: invert(0) hue-rotate(0deg) contrast(300%); 
+                filter: invert(0) hue-rotate(0deg) contrast(300%); 
             }
-            50%, 100% {
-                background-color: #000;
-                color: #ff00ff;
-                filter: invert(1) hue-rotate(270deg) contrast(220%);
+            50%, 100% { 
+                background-color: #000000; 
+                color: #ff00ff; 
+                -webkit-filter: invert(1) hue-rotate(270deg) contrast(300%); 
+                filter: invert(1) hue-rotate(270deg) contrast(300%); 
             }
         }
 
         @keyframes hard-shake {
-            0%   { transform: translate(3px, 3px); }
-            25%  { transform: translate(-3px, -2px); }
-            50%  { transform: translate(2px, -1px); }
-            75%  { transform: translate(-2px, 2px); }
-            100% { transform: translate(2px, -2px); }
+            0% { transform: translate(6px, 6px) rotate(0deg); }
+            20% { transform: translate(-6px, -3px) rotate(-2deg); }
+            40% { transform: translate(-4px, 0px) rotate(2deg); }
+            60% { transform: translate(4px, 3px) rotate(0deg); }
+            80% { transform: translate(-2px, -2px) rotate(2deg); }
+            100% { transform: translate(2px, -3px) rotate(-1deg); }
         }
 
         .bug {
             position: absolute;
             pointer-events: none;
             z-index: 5;
-            filter: drop-shadow(2px 4px 2px rgba(0,0,0,.5));
-            transition: left .4s linear, top .4s linear, transform .15s ease;
-            will-change: left, top, transform;
-        }
-
-        @media (max-width: 480px) {
-            #terminal {
-                padding-top: calc(10px + var(--safe-top));
-                padding-left: calc(10px + var(--safe-left));
-                padding-right: calc(10px + var(--safe-right));
-            }
-
-            .line { margin-bottom: 6px; }
-
-            #crash-screen p {
-                max-width: 92%;
-            }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after {
-                animation-duration: .001ms !important;
-                animation-iteration-count: 1 !important;
-                scroll-behavior: auto !important;
-            }
+            filter: drop-shadow(2px 4px 2px rgba(0,0,0,0.5));
+            transition: left 0.4s linear, top 0.4s linear, transform 0.15s ease;
         }
     </style>
 </head>
-
 <body class="crt">
-    <main id="terminal" aria-live="polite"></main>
-    <div id="flash-overlay" aria-hidden="true"></div>
 
-    <section id="crash-screen" aria-hidden="true">
+    <div id="terminal"></div>
+    <div id="flash-overlay"></div>
+
+    <div id="crash-screen">
         <h1>ACCESS DENIED</h1>
         <p>FATAL EXCEPTION // HOST DISCONNECTED</p>
-    </section>
+    </div>
 
     <script>
-        'use strict';
-
         const terminal = document.getElementById('terminal');
-        const crashScreen = document.getElementById('crash-screen');
-        const flash = document.getElementById('flash-overlay');
-
         const cursor = document.createElement('span');
         cursor.className = 'cursor';
 
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*<>';
 
         const logs = [
-            { type: 'sys',  text: 'INIT: Bootstrapping host environment...' },
-            { type: 'ok',   text: 'VFS_ALLOC: Local physical volumes mounted. (100%)' },
-            { type: 'ok',   text: 'AUTH: Privileges escalated. Token -> [PERMANENT_RESIDENCY].' },
-            { type: 'warn', text: 'SYS_TICK: Session TTL threshold reached (720h).' },
-            { type: 'warn', text: 'NET_ROUTE: Traffic rerouted to untrusted external peer.' },
-            { type: 'err',  text: 'SEC_ALARM: SQL Injection detected in [trusted_nodes.db].' },
-            { type: 'err',  text: 'KERNEL_PANIC: Core failed. Dependencies missing in empath.so.' }
+            { type: 'sys', text: 'INIT: Bootstrapping host environment...' },
+            { type: 'ok',  text: 'VFS_ALLOC: Local physical volumes mounted. (100%)' },
+            { type: 'ok',  text: 'AUTH: Privileges escalated. Token -> [PERMANENT_RESIDENCY].' },
+            { type: 'warn',text: 'SYS_TICK: Session TTL threshold reached (720h).' },
+            { type: 'warn',text: 'NET_ROUTE: Traffic rerouted to untrusted external peer.' },
+            { type: 'err', text: 'SEC_ALARM: SQL Injection detected in [trusted_nodes.db].' },
+            { type: 'err', text: 'KERNEL_PANIC: Core failed. Dependencies missing in empath.so.' }
         ];
 
+        // Indirectas mejoradas en los nombres de archivo
         const purgeFiles = [
             '/sys/loyalty.bin',
             '/var/trust.bak',
@@ -250,273 +138,207 @@
         ];
 
         let logIndex = 0;
-        let trapReady = false;
-        let crashTriggered = false;
         let audioCtx = null;
-        let activeSoundNodes = [];
-
-        function scrollTerminalToBottom() {
-            terminal.scrollTop = terminal.scrollHeight;
-        }
 
         function unlockAudio() {
+            if (audioCtx) return;
             try {
-                if (!audioCtx) {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    if (!AudioContext) return;
-                    audioCtx = new AudioContext();
-                }
-
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume().catch(() => {});
-                }
-            } catch (error) {
-                console.warn('Audio no disponible:', error);
-            }
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const buffer = audioCtx.createBuffer(1, 1, 22050);
+                const src = audioCtx.createBufferSource();
+                src.buffer = buffer;
+                src.connect(audioCtx.destination);
+                src.start(0);
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+            } catch (e) { console.warn(e); }
         }
+        
+        window.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
+        window.addEventListener('click', unlockAudio, { once: true });
+        window.addEventListener('keydown', unlockAudio, { once: true });
 
         function decodeText(element, realText, callback) {
             let iterations = 0;
-            const interval = window.setInterval(() => {
-                element.textContent = realText.split('').map((char, index) => {
-                    if (char === ' ') return ' ';
-                    if (index < iterations) return realText[index];
+            const interval = setInterval(() => {
+                element.innerText = realText.split('').map((c, i) => {
+                    if (c === ' ') return ' ';
+                    if (i < iterations) return realText[i];
                     return chars[Math.floor(Math.random() * chars.length)];
                 }).join('');
 
                 if (iterations >= realText.length) {
-                    window.clearInterval(interval);
-                    window.setTimeout(callback, 150);
+                    clearInterval(interval);
+                    setTimeout(callback, 150);
                 }
-
                 iterations += 1.5;
-                scrollTerminalToBottom();
             }, 15);
         }
 
         function processLogs() {
-            if (logIndex >= logs.length) {
-                window.setTimeout(startPurge, 300);
-                return;
+            if (logIndex < logs.length) {
+                const div = document.createElement('div');
+                div.className = `line ${logs[logIndex].type}`;
+                div.innerHTML = `<span>[${logs[logIndex].type.toUpperCase()}] </span><span></span>`;
+
+                if (terminal.contains(cursor)) terminal.removeChild(cursor);
+                terminal.appendChild(div);
+                terminal.appendChild(cursor);
+
+                decodeText(div.childNodes[1], logs[logIndex].text, processLogs);
+                logIndex++;
+            } else {
+                setTimeout(startPurge, 300);
             }
-
-            const entry = logs[logIndex];
-            const div = document.createElement('div');
-            div.className = `line ${entry.type}`;
-
-            const label = document.createElement('span');
-            label.textContent = `[${entry.type.toUpperCase()}] `;
-
-            const message = document.createElement('span');
-            div.append(label, message);
-
-            if (terminal.contains(cursor)) {
-                terminal.removeChild(cursor);
-            }
-
-            terminal.append(div, cursor);
-            logIndex += 1;
-
-            decodeText(message, entry.text, processLogs);
         }
 
         function startPurge() {
             const warning = document.createElement('div');
             warning.className = 'line err';
-            warning.textContent = '> Executing emergency purge (rm -rf /)...';
+            warning.innerText = '> Executing emergency purge (rm -rf /)...';
             terminal.insertBefore(warning, cursor);
 
             let purgeIndex = 0;
-
-            const purgeInterval = window.setInterval(() => {
-                if (purgeIndex >= purgeFiles.length) {
-                    window.clearInterval(purgeInterval);
-                    window.setTimeout(showInputTrap, 400);
-                    return;
+            const purgeInterval = setInterval(() => {
+                if (purgeIndex < purgeFiles.length) {
+                    const pDiv = document.createElement('div');
+                    pDiv.className = 'line sys';
+                    pDiv.innerText = `Deleting ${purgeFiles[purgeIndex]} ... [OK]`;
+                    terminal.insertBefore(pDiv, cursor);
+                    purgeIndex++;
+                } else {
+                    clearInterval(purgeInterval);
+                    setTimeout(showInputTrap, 400);
                 }
-
-                const line = document.createElement('div');
-                line.className = 'line sys';
-                line.textContent = `Deleting ${purgeFiles[purgeIndex]} ... [OK]`;
-
-                terminal.insertBefore(line, cursor);
-                purgeIndex += 1;
-                scrollTerminalToBottom();
-            }, 80);
+            }, 60);
         }
 
+        let trapReady = false;
         function showInputTrap() {
             const promptDiv = document.createElement('div');
             promptDiv.className = 'line prompt';
-            promptDiv.innerHTML =
-                '<br>&gt; SYSTEM LOCKED.<br>' +
-                '&gt; Critical Error in module [RELATIONSHIP_MODULE].<br>' +
-                '&gt; Tap or click the screen to acknowledge wipe and disconnect forever: ';
-
+            // Mensaje de la indirecta mucho más claro y legible por el tamaño de fuente
+            promptDiv.innerHTML = '<br>> SYSTEM LOCKED.<br>> Critical Error in module [RELATIONSHIP_MODULE].<br>> Tap screen to acknowledge wipe and disconnect forever: ';
             terminal.insertBefore(promptDiv, cursor);
             trapReady = true;
-            scrollTerminalToBottom();
         }
 
         function playErrorSound() {
             try {
-                unlockAudio();
-                if (!audioCtx) return;
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                const fire = () => {
+                    const now = audioCtx.currentTime;
+                    const masterGain = audioCtx.createGain();
+                    masterGain.gain.setValueAtTime(4.0, now);
+                    masterGain.connect(audioCtx.destination);
 
-                const now = audioCtx.currentTime;
-                const masterGain = audioCtx.createGain();
-                const osc1 = audioCtx.createOscillator();
-                const osc2 = audioCtx.createOscillator();
-                const lfo = audioCtx.createOscillator();
-                const lfoGain = audioCtx.createGain();
+                    const osc1 = audioCtx.createOscillator();
+                    osc1.type = 'square';
+                    osc1.frequency.setValueAtTime(2500, now);
 
-                masterGain.gain.setValueAtTime(0.0001, now);
-                masterGain.gain.exponentialRampToValueAtTime(0.08, now + 0.015);
-                masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+                    const osc2 = audioCtx.createOscillator();
+                    osc2.type = 'sawtooth';
+                    osc2.frequency.setValueAtTime(2650, now);
 
-                osc1.type = 'square';
-                osc1.frequency.setValueAtTime(1800, now);
+                    const lfo = audioCtx.createOscillator();
+                    lfo.type = 'square';
+                    lfo.frequency.setValueAtTime(15, now);
 
-                osc2.type = 'sawtooth';
-                osc2.frequency.setValueAtTime(1950, now);
+                    const lfoGain = audioCtx.createGain();
+                    lfoGain.gain.setValueAtTime(1000, now);
 
-                lfo.type = 'square';
-                lfo.frequency.setValueAtTime(15, now);
-                lfoGain.gain.setValueAtTime(500, now);
+                    lfo.connect(lfoGain);
+                    lfoGain.connect(osc1.frequency);
+                    lfoGain.connect(osc2.frequency);
 
-                lfo.connect(lfoGain);
-                lfoGain.connect(osc1.frequency);
-                lfoGain.connect(osc2.frequency);
+                    osc1.connect(masterGain);
+                    osc2.connect(masterGain);
 
-                osc1.connect(masterGain);
-                osc2.connect(masterGain);
-                masterGain.connect(audioCtx.destination);
+                    osc1.start(now);
+                    osc2.start(now);
+                    lfo.start(now);
+                };
 
-                activeSoundNodes = [osc1, osc2, lfo];
-
-                osc1.start(now);
-                osc2.start(now);
-                lfo.start(now);
-
-                const stopAt = now + 0.5;
-                osc1.stop(stopAt);
-                osc2.stop(stopAt);
-                lfo.stop(stopAt);
-
-                window.setTimeout(() => {
-                    activeSoundNodes = [];
-                }, 600);
-            } catch (error) {
-                console.warn('No se pudo reproducir el sonido:', error);
-            }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume().then(fire);
+                } else {
+                    fire();
+                }
+            } catch (e) { console.error(e); }
         }
 
         function playVibration() {
-            if (typeof navigator.vibrate !== 'function') return;
-
-            try {
-                navigator.vibrate([180, 80, 180, 80, 300]);
-            } catch (error) {
-                console.warn('Vibración no disponible:', error);
-            }
+            if (!navigator.vibrate) return;
+            navigator.vibrate([300, 100, 300, 100, 500, 150, 200, 150, 700]);
         }
 
         function spawnBugs() {
             const bugTypes = ['🪱', '🕷️', '🐜', '🪱'];
-            const numBugs = window.innerWidth < 480 ? 22 : 32;
+            const crashScreen = document.getElementById('crash-screen');
+            const numBugs = 45;
 
-            const fragment = document.createDocumentFragment();
-
-            for (let i = 0; i < numBugs; i += 1) {
+            for (let i = 0; i < numBugs; i++) {
                 const bug = document.createElement('div');
                 bug.className = 'bug';
-                bug.textContent = bugTypes[Math.floor(Math.random() * bugTypes.length)];
+                bug.innerText = bugTypes[Math.floor(Math.random() * bugTypes.length)];
 
                 let x = Math.random() * window.innerWidth;
                 let y = Math.random() * window.innerHeight;
+                bug.style.left = x + 'px';
+                bug.style.top = y + 'px';
 
-                bug.style.left = `${x}px`;
-                bug.style.top = `${y}px`;
-                bug.style.fontSize = `${Math.random() * 14 + 18}px`;
+                bug.style.fontSize = (Math.random() * 20 + 20) + 'px';
+                crashScreen.appendChild(bug);
 
-                fragment.appendChild(bug);
-
-                const move = () => {
-                    let nextX = x + (Math.random() - 0.5) * 180;
-                    let nextY = y + (Math.random() - 0.5) * 180;
+                setInterval(() => {
+                    let nextX = x + (Math.random() - 0.5) * 200;
+                    let nextY = y + (Math.random() - 0.5) * 200;
 
                     if (nextX < -20) nextX = window.innerWidth + 20;
                     if (nextX > window.innerWidth + 20) nextX = -20;
                     if (nextY < -20) nextY = window.innerHeight + 20;
                     if (nextY > window.innerHeight + 20) nextY = -20;
 
-                    const angle =
-                        Math.atan2(nextY - y, nextX - x) * (180 / Math.PI) + 90;
+                    let angle = Math.atan2(nextY - y, nextX - x) * (180 / Math.PI) + 90;
 
-                    bug.style.left = `${nextX}px`;
-                    bug.style.top = `${nextY}px`;
+                    bug.style.left = nextX + 'px';
+                    bug.style.top = nextY + 'px';
                     bug.style.transform = `rotate(${angle}deg)`;
 
                     x = nextX;
                     y = nextY;
-
-                    window.setTimeout(move, Math.random() * 400 + 250);
-                };
-
-                window.setTimeout(move, Math.random() * 400 + 250);
+                }, Math.random() * 300 + 200);
             }
-
-            crashScreen.appendChild(fragment);
         }
 
-        function triggerCrash(event) {
-            if (!trapReady || crashTriggered) return;
-
-            // Evita duplicados en móviles cuando un gesto termina generando click.
-            if (event && event.type === 'click' && event.detail === 0) return;
-
-            crashTriggered = true;
+        function triggerCrash(e) {
+            if (!trapReady) return;
             trapReady = false;
 
             playVibration();
             playErrorSound();
 
+            const flash = document.getElementById('flash-overlay');
             flash.style.display = 'block';
-
-            window.setTimeout(() => {
-                flash.style.display = 'none';
+            
+            setTimeout(() => { 
+                flash.style.display = 'none'; 
+                
                 document.body.classList.add('color-invert-glitch');
-
+                
                 terminal.style.display = 'none';
+                const crashScreen = document.getElementById('crash-screen');
                 crashScreen.style.display = 'flex';
-                crashScreen.setAttribute('aria-hidden', 'false');
-
+                
                 spawnBugs();
             }, 100);
         }
 
-        // Un único flujo de interacción para móvil y escritorio.
-        window.addEventListener('pointerdown', unlockAudio, { passive: true });
-        window.addEventListener('pointerdown', triggerCrash, { passive: true });
-        window.addEventListener('keydown', (event) => {
-            unlockAudio();
+        window.addEventListener('touchstart', triggerCrash, { passive: false });
+        window.addEventListener('click', triggerCrash);
+        window.addEventListener('keydown', triggerCrash);
 
-            if (event.key === 'Enter' || event.key === ' ') {
-                triggerCrash(event);
-            }
-        });
-
-        window.addEventListener('resize', () => {
-            // Mantiene el contenido correcto tras rotar el teléfono.
-            if (crashScreen.style.display === 'flex') {
-                document.querySelectorAll('.bug').forEach((bug) => {
-                    bug.style.left = `${Math.min(parseFloat(bug.style.left) || 0, window.innerWidth + 20)}px`;
-                    bug.style.top = `${Math.min(parseFloat(bug.style.top) || 0, window.innerHeight + 20)}px`;
-                });
-            }
-        }, { passive: true });
-
-        window.setTimeout(processLogs, 300);
+        setTimeout(processLogs, 300);
     </script>
 </body>
 </html>
