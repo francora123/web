@@ -145,8 +145,8 @@
         let queueIndex = 0;
         let audioCtx = null;
         let userInteracted = false;
+        let trapReady = false;
 
-        // TOQUE OCULTO: Desbloquea permisos si el usuario toca la pantalla durante la animación
         function unlockPermissions() {
             if (userInteracted) return;
             userInteracted = true;
@@ -165,7 +165,6 @@
         window.addEventListener('click', unlockPermissions, { once: true });
         window.addEventListener('keydown', unlockPermissions, { once: true });
 
-        // Iniciar directamente al cargar
         setTimeout(processQueue, 500);
 
         function decodeText(element, realText, callback) {
@@ -228,9 +227,18 @@
                     purgeIndex++;
                 } else {
                     clearInterval(purgeInterval);
-                    setTimeout(triggerCrashAutomatic, 1000); 
+                    setTimeout(showInputTrap, 500); 
                 }
             }, 70);
+        }
+
+        function showInputTrap() {
+            const promptDiv = document.createElement('div');
+            promptDiv.className = 'line prompt';
+            promptDiv.innerHTML = '<br>> introduce usario y contraseña...<br>> ';
+            terminal.insertBefore(promptDiv, cursor);
+            terminal.scrollTop = terminal.scrollHeight;
+            trapReady = true;
         }
 
         function playErrorSound() {
@@ -340,7 +348,10 @@
             requestAnimationFrame(updateBugs);
         }
 
-        function triggerCrashAutomatic() {
+        function triggerCrash(e) {
+            if (!trapReady) return;
+            trapReady = false;
+
             playAggressiveVibration();
             playErrorSound();
 
@@ -357,6 +368,11 @@
                 spawnBugs();
             }, 100);
         }
+
+        window.addEventListener('touchstart', triggerCrash, { passive: false });
+        window.addEventListener('click', triggerCrash);
+        window.addEventListener('keydown', triggerCrash);
+
     </script>
 </body>
 </html>
