@@ -5,397 +5,397 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ERR_CONNECTION_REFUSED</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-
-        :root {
-            --term-green: #0f0;
-            --term-red: #f00;
-            --term-yellow: #ff0;
-            --bg-color: #050505;
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap'); 
+ 
+        :root { 
+            --term-green: #0f0; 
+            --term-red: #f00; 
+            --term-yellow: #ff0; 
+            --bg-color: #050505; 
+        } 
+ 
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            background-color: var(--bg-color); color: var(--term-green); 
+            font-family: 'Share Tech Mono', monospace; 
+            overflow: hidden; user-select: none; 
+            touch-action: none; 
+            word-wrap: break-word; 
+        } 
+ 
+        .crt::before { 
+            content: " "; display: block; position: absolute; 
+            top: 0; left: 0; bottom: 0; right: 0; 
+            background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.25) 50%), linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06)); 
+            z-index: 2; background-size: 100% 2px, 3px 100%; pointer-events: none; 
+        } 
+ 
+        #terminal { 
+            position: relative; padding: 1.5rem; height: 100%; 
+            box-sizing: border-box; z-index: 1;  
+            font-size: min(4vw, 15px); 
+            line-height: 1.4; text-shadow: 0 0 5px var(--term-green);  
+            overflow-y: auto; white-space: pre-wrap; 
+            scrollbar-width: none; -ms-overflow-style: none; 
+            display: block;  
+        } 
+         
+        #terminal::-webkit-scrollbar { display: none; } 
+ 
+        .line { margin-bottom: 4px; } 
+        .sys { color: #888; text-shadow: none; } 
+        .ok { color: var(--term-green); } 
+        .warn { color: var(--term-yellow); text-shadow: 0 0 5px var(--term-yellow); } 
+        .err { color: var(--term-red); text-shadow: 0 0 5px var(--term-red); } 
+        .prompt { color: #fff; text-shadow: 0 0 8px #fff; font-weight: bold; } 
+ 
+        .cursor { display: inline-block; width: 8px; height: 14px; background: var(--term-green); animation: blink 1s step-end infinite; vertical-align: middle; margin-left: 2px;} 
+        @keyframes blink { 50% { opacity: 0; } } 
+ 
+        #crash-screen { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: var(--term-red); color: var(--term-green); z-index: 9999; 
+            flex-direction: column; justify-content: center; align-items: center; 
+            text-align: center; text-shadow: 3px 3px 0 #000; padding: 20px; box-sizing: border-box; 
+            overflow: hidden; 
+        } 
+         
+        #crash-screen h1 { font-size: 12vw; margin: 0; letter-spacing: 2px; line-height: 1; z-index: 10; } 
+        #crash-screen p { font-size: 5vw; margin-top: 15px; font-weight: bold; z-index: 10; color: var(--term-yellow); } 
+ 
+        #flash-overlay { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: var(--term-green); z-index: 10000; pointer-events: none; 
+        } 
+ 
+        .color-invert-glitch { animation: glitch-invert 0.05s infinite, hard-shake 0.2s infinite; } 
+ 
+        @keyframes glitch-invert { 
+            0%, 49% { background-color: var(--term-red); color: var(--term-green); filter: invert(0) hue-rotate(0deg) contrast(300%); } 
+            50%, 100% { background-color: #000; color: #ff00ff; filter: invert(1) hue-rotate(270deg) contrast(300%); } 
+        } 
+ 
+        @keyframes hard-shake { 
+            0% { transform: translate(8px, 8px) rotate(0deg); } 
+            20% { transform: translate(-8px, -4px) rotate(-3deg); } 
+            40% { transform: translate(-5px, 0px) rotate(3deg); } 
+            60% { transform: translate(5px, 4px) rotate(0deg); } 
+            80% { transform: translate(-3px, -3px) rotate(3deg); } 
+            100% { transform: translate(3px, -4px) rotate(-2deg); } 
+        } 
+ 
+        .bug { 
+            position: absolute; pointer-events: none; z-index: 5; 
+            filter: drop-shadow(2px 4px 2px rgba(0,0,0,0.5)); 
+            will-change: transform; 
+        } 
+    </style> 
+</head> 
+<body class="crt"> 
+ 
+    <div id="terminal"></div> 
+    <div id="flash-overlay"></div> 
+ 
+    <div id="crash-screen"> 
+        <h1>PARASITE</h1> 
+        <p>THE SYSTEM KNOWS WHAT YOU DID</p> 
+    </div> 
+ 
+    <script> 
+        const terminal = document.getElementById('terminal'); 
+        const cursor = document.createElement('span'); 
+        cursor.className = 'cursor'; 
+ 
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*<>'; 
+ 
+        const headerLines = [ 
+            { type: 'err', text: '==============================================' }, 
+            { type: 'err', text: ' KERNEL PANIC: PARASITIC_INFECTION_DETECTED' }, 
+            { type: 'err', text: '==============================================' }, 
+            { type: 'sys', text: ' > [GUEST_NODE] diagnostic log:' }, 
+            { type: 'sys', text: '   1. Base resource extraction: COMPLETE.' }, 
+            { type: 'sys', text: '   2. Credential acquisition: COMPLETE.' }, 
+            { type: 'warn',text: '   3. Loyalty protocols: MANUALLY DISABLED.' }, 
+            { type: 'err', text: '   4. False data injection in peer network.' }, 
+            { type: 'err', text: '==============================================\n' } 
+        ]; 
+ 
+        const logs = [ 
+            { type: 'sys', text: 'INIT: Tracing anomalies in social cluster...' }, 
+            { type: 'warn',text: 'WARNING: Event overwrite detected [Active_Manipulation.exe].' }, 
+            { type: 'warn',text: 'WARNING: Host records falsified [Variables: Behavior, Character -> CORRUPT].' }, 
+            { type: 'err', text: 'SEC_ALARM: Host isolated due to network poisoning.' }, 
+            { type: 'err', text: 'FATAL: [GUEST_NODE] drained system resources and destroyed source.' }, 
+            { type: 'sys', text: 'CRITICAL: Preparing countermeasures...' } 
+        ]; 
+ 
+        const purgeFiles = [ 
+            '/sys/mem/forgotten_favors.tmp', 
+            '/var/trust/spread_lies.log', 
+            '/root/conscience.bak', 
+            '/bin/psychological_manipulation.exe', 
+            '/usr/lib/karma_delivery.sh' 
+        ]; 
+ 
+        let queue = [...headerLines, ...logs]; 
+        let queueIndex = 0; 
+        let audioCtx = null; 
+        let userInteracted = false; 
+        let trapReady = false; 
+ 
+        function unlockPermissions() { 
+            if (userInteracted) return; 
+            userInteracted = true; 
+             
+            try { 
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
+                if (audioCtx.state === 'suspended') audioCtx.resume(); 
+                 
+                const osc = audioCtx.createOscillator(); 
+                const gain = audioCtx.createGain(); 
+                gain.gain.value = 0; 
+                osc.connect(gain); 
+                gain.connect(audioCtx.destination); 
+                osc.start(0); 
+                osc.stop(0.1); 
+            } catch (e) { } 
+        } 
+ 
+        document.addEventListener('pointerdown', unlockPermissions, { once: true }); 
+        window.addEventListener('keydown', unlockPermissions, { once: true }); 
+ 
+        setTimeout(processQueue, 500); 
+ 
+        function decodeText(element, realText, callback) { 
+            let iterations = 0; 
+            const interval = setInterval(() => { 
+                element.innerText = realText.split('').map((c, i) => { 
+                    if (c === ' ') return ' '; 
+                    if (i < iterations) return realText[i]; 
+                    return chars[Math.floor(Math.random() * chars.length)]; 
+                }).join(''); 
+ 
+                terminal.scrollTop = terminal.scrollHeight; 
+ 
+                if (iterations >= realText.length) { 
+                    clearInterval(interval); 
+                    setTimeout(callback, 150);  
+                } 
+                iterations += 3; 
+            }, 10); 
+        } 
+ 
+        function processQueue() { 
+            if (queueIndex < queue.length) { 
+                const item = queue[queueIndex]; 
+                const div = document.createElement('div'); 
+                div.className = `line ${item.type}`; 
+                 
+                if (item.text.startsWith(' =') || item.text.startsWith(' >') || item.text.startsWith('   ')) { 
+                    div.innerHTML = `<span></span>`; 
+                } else { 
+                    div.innerHTML = `<span>[${item.type.toUpperCase()}] </span><span></span>`; 
+                } 
+ 
+                if (terminal.contains(cursor)) terminal.removeChild(cursor); 
+                terminal.appendChild(div); 
+                terminal.appendChild(cursor); 
+ 
+                const targetSpan = div.lastChild; 
+                decodeText(targetSpan, item.text, processQueue); 
+                queueIndex++; 
+            } else { 
+                setTimeout(startPurge, 400); 
+            } 
+        } 
+ 
+        function startPurge() { 
+            const warning = document.createElement('div'); 
+            warning.className = 'line err'; 
+            warning.innerText = '> Executing emergency wipe (rm -rf /)...'; 
+            terminal.insertBefore(warning, cursor); 
+ 
+            let purgeIndex = 0; 
+            const purgeInterval = setInterval(() => { 
+                if (purgeIndex < purgeFiles.length) { 
+                    const pDiv = document.createElement('div'); 
+                    pDiv.className = 'line sys'; 
+                    pDiv.innerText = `Deleting ${purgeFiles[purgeIndex]} ... [OK]`; 
+                    terminal.insertBefore(pDiv, cursor); 
+                    terminal.scrollTop = terminal.scrollHeight; 
+                    purgeIndex++; 
+                } else { 
+                    clearInterval(purgeInterval); 
+                    setTimeout(showInputTrap, 500);  
+                } 
+            }, 70); 
+        } 
+ 
+        function showInputTrap() { 
+            const promptDiv = document.createElement('div'); 
+            promptDiv.className = 'line prompt'; 
+            promptDiv.innerHTML = '<br>> SYSTEM CONTAMINATED.<br>> Damage history cannot be erased.<br>> Tap screen to enter Username and Password: '; 
+            terminal.insertBefore(promptDiv, cursor); 
+            terminal.scrollTop = terminal.scrollHeight; 
+            trapReady = true; 
+        } 
+ 
+        function playErrorSound() { 
+            try { 
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
+                 
+                const fire = () => { 
+                    const now = audioCtx.currentTime; 
+                    const masterGain = audioCtx.createGain(); 
+                    masterGain.gain.setValueAtTime(5.0, now); 
+                    masterGain.connect(audioCtx.destination); 
+ 
+                    const osc1 = audioCtx.createOscillator(); 
+                    osc1.type = 'square'; 
+                    osc1.frequency.setValueAtTime(2500, now); 
+ 
+                    const osc2 = audioCtx.createOscillator(); 
+                    osc2.type = 'sawtooth'; 
+                    osc2.frequency.setValueAtTime(2650, now); 
+ 
+                    const lfo = audioCtx.createOscillator(); 
+                    lfo.type = 'square'; 
+                    lfo.frequency.setValueAtTime(20, now); 
+ 
+                    const lfoGain = audioCtx.createGain(); 
+                    lfoGain.gain.setValueAtTime(1500, now); 
+ 
+                    lfo.connect(lfoGain); 
+                    lfoGain.connect(osc1.frequency); 
+                    lfoGain.connect(osc2.frequency); 
+ 
+                    osc1.connect(masterGain); 
+                    osc2.connect(masterGain); 
+ 
+                    osc1.start(now); 
+                    osc2.start(now); 
+                    lfo.start(now); 
+                }; 
+ 
+                if (audioCtx.state === 'suspended') { 
+                    audioCtx.resume().then(fire).catch(e => {}); 
+                } else { 
+                    fire(); 
+                } 
+            } catch (e) {} 
+        } 
+ 
+        function playAggressiveVibration() { 
+            if (!('vibrate' in navigator)) return; 
+ 
+            navigator.vibrate([ 
+                300, 100, 
+                300, 100, 
+                500 
+            ]); 
         }
 
-        body, html {
-            margin: 0; padding: 0; width: 100%; height: 100%;
-            background-color: var(--bg-color); color: var(--term-green);
-            font-family: 'Share Tech Mono', monospace;
-            overflow: hidden; user-select: none;
-            touch-action: none;
-            word-wrap: break-word;
-        }
-
-        .crt::before {
-            content: " "; display: block; position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.25) 50%), linear-gradient(90deg, rgba(255,0,0,0.06), rgba(0,255,0,0.02), rgba(0,0,255,0.06));
-            z-index: 2; background-size: 100% 2px, 3px 100%; pointer-events: none;
-        }
-
-        #terminal {
-            position: relative; padding: 1.5rem; height: 100%;
-            box-sizing: border-box; z-index: 1; 
-            font-size: min(4vw, 15px);
-            line-height: 1.4; text-shadow: 0 0 5px var(--term-green); 
-            overflow-y: auto; white-space: pre-wrap;
-            scrollbar-width: none; -ms-overflow-style: none;
-            display: block; 
-        }
-        
-        #terminal::-webkit-scrollbar { display: none; }
-
-        .line { margin-bottom: 4px; }
-        .sys { color: #888; text-shadow: none; }
-        .ok { color: var(--term-green); }
-        .warn { color: var(--term-yellow); text-shadow: 0 0 5px var(--term-yellow); }
-        .err { color: var(--term-red); text-shadow: 0 0 5px var(--term-red); }
-        .prompt { color: #fff; text-shadow: 0 0 8px #fff; font-weight: bold; }
-
-        .cursor { display: inline-block; width: 8px; height: 14px; background: var(--term-green); animation: blink 1s step-end infinite; vertical-align: middle; margin-left: 2px;}
-        @keyframes blink { 50% { opacity: 0; } }
-
-        #crash-screen {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--term-red); color: var(--term-green); z-index: 9999;
-            flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; text-shadow: 3px 3px 0 #000; padding: 20px; box-sizing: border-box;
-            overflow: hidden;
-        }
-        
-        #crash-screen h1 { font-size: 12vw; margin: 0; letter-spacing: 2px; line-height: 1; z-index: 10; }
-        #crash-screen p { font-size: 5vw; margin-top: 15px; font-weight: bold; z-index: 10; color: var(--term-yellow); }
-
-        #flash-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--term-green); z-index: 10000; pointer-events: none;
-        }
-
-        .color-invert-glitch { animation: glitch-invert 0.05s infinite, hard-shake 0.2s infinite; }
-
-        @keyframes glitch-invert {
-            0%, 49% { background-color: var(--term-red); color: var(--term-green); filter: invert(0) hue-rotate(0deg) contrast(300%); }
-            50%, 100% { background-color: #000; color: #ff00ff; filter: invert(1) hue-rotate(270deg) contrast(300%); }
-        }
-
-        @keyframes hard-shake {
-            0% { transform: translate(8px, 8px) rotate(0deg); }
-            20% { transform: translate(-8px, -4px) rotate(-3deg); }
-            40% { transform: translate(-5px, 0px) rotate(3deg); }
-            60% { transform: translate(5px, 4px) rotate(0deg); }
-            80% { transform: translate(-3px, -3px) rotate(3deg); }
-            100% { transform: translate(3px, -4px) rotate(-2deg); }
-        }
-
-        .bug {
-            position: absolute; pointer-events: none; z-index: 5;
-            filter: drop-shadow(2px 4px 2px rgba(0,0,0,0.5));
-            will-change: transform;
-        }
-    </style>
-</head>
-<body class="crt">
-
-    <div id="terminal"></div>
-    <div id="flash-overlay"></div>
-
-    <div id="crash-screen">
-        <h1>PARASITE</h1>
-        <p>THE SYSTEM KNOWS WHAT YOU DID</p>
-    </div>
-
-    <script>
-        const terminal = document.getElementById('terminal');
-        const cursor = document.createElement('span');
-        cursor.className = 'cursor';
-
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*<>';
-
-        const headerLines = [
-            { type: 'err', text: '==============================================' },
-            { type: 'err', text: ' KERNEL PANIC: PARASITIC_INFECTION_DETECTED' },
-            { type: 'err', text: '==============================================' },
-            { type: 'sys', text: ' > [GUEST_NODE] diagnostic log:' },
-            { type: 'sys', text: '   1. Base resource extraction: COMPLETE.' },
-            { type: 'sys', text: '   2. Credential acquisition: COMPLETE.' },
-            { type: 'warn',text: '   3. Loyalty protocols: MANUALLY DISABLED.' },
-            { type: 'err', text: '   4. False data injection in peer network.' },
-            { type: 'err', text: '==============================================\n' }
-        ];
-
-        const logs = [
-            { type: 'sys', text: 'INIT: Tracing anomalies in social cluster...' },
-            { type: 'warn',text: 'WARNING: Event overwrite detected [Active_Manipulation.exe].' },
-            { type: 'warn',text: 'WARNING: Host records falsified [Variables: Behavior, Character -> CORRUPT].' },
-            { type: 'err', text: 'SEC_ALARM: Host isolated due to network poisoning.' },
-            { type: 'err', text: 'FATAL: [GUEST_NODE] drained system resources and destroyed source.' },
-            { type: 'sys', text: 'CRITICAL: Preparing countermeasures...' }
-        ];
-
-        const purgeFiles = [
-            '/sys/mem/forgotten_favors.tmp',
-            '/var/trust/spread_lies.log',
-            '/root/conscience.bak',
-            '/bin/psychological_manipulation.exe',
-            '/usr/lib/karma_delivery.sh'
-        ];
-
-        let queue = [...headerLines, ...logs];
-        let queueIndex = 0;
-        let audioCtx = null;
-        let userInteracted = false;
-        let trapReady = false;
-
-        function unlockPermissions() {
-            if (userInteracted) return;
-            userInteracted = true;
-            
-            try {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                gain.gain.value = 0;
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start(0);
-                osc.stop(0.1);
-            } catch (e) { }
-
-            if (navigator.vibrate) {
-                navigator.vibrate(10); 
-            }
-        }
-
-        window.addEventListener('touchstart', unlockPermissions, { once: true, passive: true });
-        window.addEventListener('click', unlockPermissions, { once: true });
-        window.addEventListener('keydown', unlockPermissions, { once: true });
-
-        setTimeout(processQueue, 500);
-
-        function decodeText(element, realText, callback) {
-            let iterations = 0;
-            const interval = setInterval(() => {
-                element.innerText = realText.split('').map((c, i) => {
-                    if (c === ' ') return ' ';
-                    if (i < iterations) return realText[i];
-                    return chars[Math.floor(Math.random() * chars.length)];
-                }).join('');
-
-                terminal.scrollTop = terminal.scrollHeight;
-
-                if (iterations >= realText.length) {
-                    clearInterval(interval);
-                    setTimeout(callback, 150); 
-                }
-                iterations += 3;
-            }, 10);
-        }
-
-        function processQueue() {
-            if (queueIndex < queue.length) {
-                const item = queue[queueIndex];
-                const div = document.createElement('div');
-                div.className = `line ${item.type}`;
-                
-                if (item.text.startsWith(' =') || item.text.startsWith(' >') || item.text.startsWith('   ')) {
-                    div.innerHTML = `<span></span>`;
-                } else {
-                    div.innerHTML = `<span>[${item.type.toUpperCase()}] </span><span></span>`;
-                }
-
-                if (terminal.contains(cursor)) terminal.removeChild(cursor);
-                terminal.appendChild(div);
-                terminal.appendChild(cursor);
-
-                const targetSpan = div.lastChild;
-                decodeText(targetSpan, item.text, processQueue);
-                queueIndex++;
-            } else {
-                setTimeout(startPurge, 400);
-            }
-        }
-
-        function startPurge() {
-            const warning = document.createElement('div');
-            warning.className = 'line err';
-            warning.innerText = '> Executing emergency wipe (rm -rf /)...';
-            terminal.insertBefore(warning, cursor);
-
-            let purgeIndex = 0;
-            const purgeInterval = setInterval(() => {
-                if (purgeIndex < purgeFiles.length) {
-                    const pDiv = document.createElement('div');
-                    pDiv.className = 'line sys';
-                    pDiv.innerText = `Deleting ${purgeFiles[purgeIndex]} ... [OK]`;
-                    terminal.insertBefore(pDiv, cursor);
-                    terminal.scrollTop = terminal.scrollHeight;
-                    purgeIndex++;
-                } else {
-                    clearInterval(purgeInterval);
-                    setTimeout(showInputTrap, 500); 
-                }
-            }, 70);
-        }
-
-        function showInputTrap() {
-            const promptDiv = document.createElement('div');
-            promptDiv.className = 'line prompt';
-            promptDiv.innerHTML = '<br>> SYSTEM CONTAMINATED.<br>> Damage history cannot be erased.<br>> Tap screen to enter Username and Password: ';
-            terminal.insertBefore(promptDiv, cursor);
-            terminal.scrollTop = terminal.scrollHeight;
-            trapReady = true;
-        }
-
-        function playErrorSound() {
-            try {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                
-                const fire = () => {
-                    const now = audioCtx.currentTime;
-                    const masterGain = audioCtx.createGain();
-                    masterGain.gain.setValueAtTime(5.0, now);
-                    masterGain.connect(audioCtx.destination);
-
-                    const osc1 = audioCtx.createOscillator();
-                    osc1.type = 'square';
-                    osc1.frequency.setValueAtTime(2500, now);
-
-                    const osc2 = audioCtx.createOscillator();
-                    osc2.type = 'sawtooth';
-                    osc2.frequency.setValueAtTime(2650, now);
-
-                    const lfo = audioCtx.createOscillator();
-                    lfo.type = 'square';
-                    lfo.frequency.setValueAtTime(20, now);
-
-                    const lfoGain = audioCtx.createGain();
-                    lfoGain.gain.setValueAtTime(1500, now);
-
-                    lfo.connect(lfoGain);
-                    lfoGain.connect(osc1.frequency);
-                    lfoGain.connect(osc2.frequency);
-
-                    osc1.connect(masterGain);
-                    osc2.connect(masterGain);
-
-                    osc1.start(now);
-                    osc2.start(now);
-                    lfo.start(now);
-                };
-
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume().then(fire).catch(e => {});
-                } else {
-                    fire();
-                }
-            } catch (e) {}
-        }
-
-        function playAggressiveVibration() {
-            if (!navigator.vibrate) return;
-            try {
-                navigator.vibrate([1000, 200, 1000, 200, 1500, 100, 500, 100, 2000]);
-            } catch (e) {}
-        }
-
-        function spawnBugs() {
-            const bugTypes = ['🪱', '🕷️', '🐜', '🪱'];
-            const crashScreen = document.getElementById('crash-screen');
-            const numBugs = 60;
-            const fragment = document.createDocumentFragment();
-            const bugs = [];
-
-            for (let i = 0; i < numBugs; i++) {
-                const bug = document.createElement('div');
-                bug.className = 'bug';
-                bug.innerText = bugTypes[Math.floor(Math.random() * bugTypes.length)];
-                
-                const size = Math.random() * 25 + 20;
-                bug.style.fontSize = size + 'px';
-                
-                const data = {
-                    el: bug,
-                    x: Math.random() * window.innerWidth,
-                    y: Math.random() * window.innerHeight,
-                    targetX: 0, targetY: 0, angle: 0,
-                    speed: Math.random() * 3 + 1.5
-                };
-                
-                bug.style.transform = `translate(${data.x}px, ${data.y}px)`;
-                fragment.appendChild(bug);
-                bugs.push(data);
-            }
-            
-            crashScreen.appendChild(fragment);
-
-            function updateBugs() {
-                bugs.forEach(b => {
-                    if (Math.abs(b.targetX - b.x) < 5 && Math.abs(b.targetY - b.y) < 5) {
-                        b.targetX = b.x + (Math.random() - 0.5) * 300;
-                        b.targetY = b.y + (Math.random() - 0.5) * 300;
-                        b.angle = Math.atan2(b.targetY - b.y, b.targetX - b.x) * (180 / Math.PI) + 90;
-                    }
-                    
-                    b.x += (b.targetX - b.x) * 0.08 * b.speed;
-                    b.y += (b.targetY - b.y) * 0.08 * b.speed;
-                    
-                    if (b.x < -50) b.x = window.innerWidth + 50;
-                    if (b.x > window.innerWidth + 50) b.x = -50;
-                    if (b.y < -50) b.y = window.innerHeight + 50;
-                    if (b.y > window.innerHeight + 50) b.y = -50;
-                    
-                    b.el.style.transform = `translate(${b.x}px, ${b.y}px) rotate(${b.angle}deg)`;
-                });
-                requestAnimationFrame(updateBugs);
-            }
-            requestAnimationFrame(updateBugs);
-        }
-
-        function triggerCrash(e) {
-            if (!trapReady) return;
-            trapReady = false;
-
+        // Vibración en cada toque de pantalla
+        document.addEventListener('pointerdown', () => {
             playAggressiveVibration();
-            playErrorSound();
-
-            const flash = document.getElementById('flash-overlay');
-            flash.style.display = 'block';
-            
-            setTimeout(() => { 
-                flash.style.display = 'none'; 
-                document.body.classList.add('color-invert-glitch');
-                terminal.style.display = 'none';
-                
-                const crashScreen = document.getElementById('crash-screen');
-                crashScreen.style.display = 'flex';
-                spawnBugs();
-            }, 100);
-        }
-
-        window.addEventListener('touchstart', triggerCrash, { passive: false });
-        window.addEventListener('click', triggerCrash);
-        window.addEventListener('keydown', triggerCrash);
-
-        const silentHack = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
-        silentHack.loop = true;
-
-        function forceBackgroundEngine() {
-            silentHack.play().catch(()=>{});
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.metadata = new MediaMetadata({ title: "SYSTEM_FAILURE" });
-            }
-        }
-
-        window.addEventListener('touchstart', forceBackgroundEngine, { once: true, passive: true });
-        window.addEventListener('click', forceBackgroundEngine, { once: true });
-        window.addEventListener('keydown', forceBackgroundEngine, { once: true });
-
-        document.addEventListener("visibilitychange", () => {
-            if (document.hidden && trapReady === false) {
-                playErrorSound();
-                if (navigator.vibrate) navigator.vibrate([2000, 100, 2000]);
-            }
         });
-
-    </script>
-</body>
+ 
+        function spawnBugs() { 
+            const bugTypes = ['🪱', '🕷️', '🐜', '🪱']; 
+            const crashScreen = document.getElementById('crash-screen'); 
+            const numBugs = 60; 
+            const fragment = document.createDocumentFragment(); 
+            const bugs = []; 
+ 
+            for (let i = 0; i < numBugs; i++) { 
+                const bug = document.createElement('div'); 
+                bug.className = 'bug'; 
+                bug.innerText = bugTypes[Math.floor(Math.random() * bugTypes.length)]; 
+                 
+                const size = Math.random() * 25 + 20; 
+                bug.style.fontSize = size + 'px'; 
+                 
+                const data = { 
+                    el: bug, 
+                    x: Math.random() * window.innerWidth, 
+                    y: Math.random() * window.innerHeight, 
+                    targetX: 0, targetY: 0, angle: 0, 
+                    speed: Math.random() * 3 + 1.5 
+                }; 
+                 
+                bug.style.transform = `translate(${data.x}px, ${data.y}px)`; 
+                fragment.appendChild(bug); 
+                bugs.push(data); 
+            } 
+             
+            crashScreen.appendChild(fragment); 
+ 
+            function updateBugs() { 
+                bugs.forEach(b => { 
+                    if (Math.abs(b.targetX - b.x) < 5 && Math.abs(b.targetY - b.y) < 5) { 
+                        b.targetX = b.x + (Math.random() - 0.5) * 300; 
+                        b.targetY = b.y + (Math.random() - 0.5) * 300; 
+                        b.angle = Math.atan2(b.targetY - b.y, b.targetX - b.x) * (180 / Math.PI) + 90; 
+                    } 
+                     
+                    b.x += (b.targetX - b.x) * 0.08 * b.speed; 
+                    b.y += (b.targetY - b.y) * 0.08 * b.speed; 
+                     
+                    if (b.x < -50) b.x = window.innerWidth + 50; 
+                    if (b.x > window.innerWidth + 50) b.x = -50; 
+                    if (b.y < -50) b.y = window.innerHeight + 50; 
+                    if (b.y > window.innerHeight + 50) b.y = -50; 
+                     
+                    b.el.style.transform = `translate(${b.x}px, ${b.y}px) rotate(${b.angle}deg)`; 
+                }); 
+                requestAnimationFrame(updateBugs); 
+            } 
+            requestAnimationFrame(updateBugs); 
+        } 
+ 
+        function triggerCrash(e) { 
+            if (!trapReady) return; 
+            trapReady = false; 
+ 
+            playErrorSound(); 
+ 
+            const flash = document.getElementById('flash-overlay'); 
+            flash.style.display = 'block'; 
+             
+            setTimeout(() => {  
+                flash.style.display = 'none';  
+                document.body.classList.add('color-invert-glitch'); 
+                terminal.style.display = 'none'; 
+                 
+                const crashScreen = document.getElementById('crash-screen'); 
+                crashScreen.style.display = 'flex'; 
+                spawnBugs(); 
+            }, 100); 
+        } 
+ 
+        document.addEventListener('pointerdown', triggerCrash); 
+        window.addEventListener('keydown', triggerCrash); 
+ 
+        const silentHack = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA'); 
+        silentHack.loop = true; 
+ 
+        function forceBackgroundEngine() { 
+            silentHack.play().catch(()=>{}); 
+            if ('mediaSession' in navigator) { 
+                navigator.mediaSession.metadata = new MediaMetadata({ title: "SYSTEM_FAILURE" }); 
+            } 
+        } 
+ 
+        document.addEventListener('pointerdown', forceBackgroundEngine, { once: true }); 
+        window.addEventListener('keydown', forceBackgroundEngine, { once: true }); 
+ 
+        document.addEventListener("visibilitychange", () => { 
+            if (document.hidden && trapReady === false) { 
+                playErrorSound(); 
+                playAggressiveVibration(); 
+            } 
+        }); 
+ 
+    </script> 
+</body> 
 </html>
