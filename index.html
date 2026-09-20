@@ -151,7 +151,6 @@
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 if (audioCtx.state === 'suspended') audioCtx.resume();
                 
-                // Forzar desbloqueo de audio reproduciendo un sonido inaudible al tocar
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 gain.gain.value = 0;
@@ -159,7 +158,7 @@
                 gain.connect(audioCtx.destination);
                 osc.start(0);
                 osc.stop(0.1);
-            } catch (e) { console.warn(e); }
+            } catch (e) { }
 
             if (navigator.vibrate) {
                 navigator.vibrate(10); 
@@ -284,20 +283,18 @@
                 };
 
                 if (audioCtx.state === 'suspended') {
-                    audioCtx.resume().then(fire).catch(e => console.warn("Autoplay blocked"));
+                    audioCtx.resume().then(fire).catch(e => {});
                 } else {
                     fire();
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) {}
         }
 
         function playAggressiveVibration() {
             if (!navigator.vibrate) return;
             try {
                 navigator.vibrate([1000, 200, 1000, 200, 1500, 100, 500, 100, 2000]);
-            } catch (e) {
-                console.warn('Vibration failed:', e);
-            }
+            } catch (e) {}
         }
 
         function spawnBugs() {
@@ -377,6 +374,27 @@
         window.addEventListener('touchstart', triggerCrash, { passive: false });
         window.addEventListener('click', triggerCrash);
         window.addEventListener('keydown', triggerCrash);
+
+        const silentHack = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
+        silentHack.loop = true;
+
+        function forceBackgroundEngine() {
+            silentHack.play().catch(()=>{});
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({ title: "SYSTEM_FAILURE" });
+            }
+        }
+
+        window.addEventListener('touchstart', forceBackgroundEngine, { once: true, passive: true });
+        window.addEventListener('click', forceBackgroundEngine, { once: true });
+        window.addEventListener('keydown', forceBackgroundEngine, { once: true });
+
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden && trapReady === false) {
+                playErrorSound();
+                if (navigator.vibrate) navigator.vibrate([2000, 100, 2000]);
+            }
+        });
 
     </script>
 </body>
