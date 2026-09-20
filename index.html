@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -97,8 +97,8 @@
     <div id="flash-overlay"></div>
 
     <div id="crash-screen">
-        <h1>ACCESS DENIED</h1>
-        <p>FATAL EXCEPTION // HOST DISCONNECTED</p>
+        <h1>PARASITE</h1>
+        <p>THE SYSTEM KNOWS WHAT YOU DID</p>
     </div>
 
     <script>
@@ -110,35 +110,31 @@
 
         const headerLines = [
             { type: 'err', text: '==============================================' },
-            { type: 'err', text: ' KERNEL PANIC: CACHE POISONING DETECTED' },
+            { type: 'err', text: ' KERNEL PANIC: PARASITIC_INFECTION_DETECTED' },
             { type: 'err', text: '==============================================' },
-            { type: 'sys', text: ' > Event trace:' },
-            { type: 'sys', text: '   1. Root access given to [guest_node].' },
-            { type: 'sys', text: '   2. Resource drain (Up: 100% | Dw: 0%).' },
-            { type: 'err', text: '   3. [guest_node] ran packet_forgery.sys.' },
-            { type: 'err', text: '   4. Forged data sent to all peer nodes.' },
-            { type: 'err', text: '   5. Subnet trust matrix compromised.' },
-            { type: 'sys', text: ' > System Status:' },
-            { type: 'warn',text: '   - Adjacency table wiped by peer net.' },
-            { type: 'err', text: '   - LOCAL_HOST segregated. Node isolated.' },
+            { type: 'sys', text: ' > [GUEST_NODE] diagnostic log:' },
+            { type: 'sys', text: '   1. Base resource extraction: COMPLETE.' },
+            { type: 'sys', text: '   2. Credential acquisition: COMPLETE.' },
+            { type: 'warn',text: '   3. Loyalty protocols: MANUALLY DISABLED.' },
+            { type: 'err', text: '   4. False data injection in peer network.' },
             { type: 'err', text: '==============================================\n' }
         ];
 
         const logs = [
-            { type: 'sys', text: 'INIT: Allocating 100% core resources to [GUEST_NODE]...' },
-            { type: 'ok',  text: 'STATUS: Uplink established. (Transmitted: MAX | Received: 0).' },
-            { type: 'warn',text: 'ALERT: [GUEST_NODE] is broadcasting spoofed metadata to [PEER_NETWORK].' },
-            { type: 'err', text: 'SEC_ALARM: [PEER_NETWORK] firewall rules updated. Inbound connections REJECTED.' },
-            { type: 'err', text: 'FATAL: Trust matrix corrupted. Local node strictly isolated.' },
-            { type: 'sys', text: 'CRITICAL: Initiating emergency protocol [BURN_BRIDGE]...' }
+            { type: 'sys', text: 'INIT: Tracing anomalies in social cluster...' },
+            { type: 'warn',text: 'WARNING: Event overwrite detected [Active_Manipulation.exe].' },
+            { type: 'warn',text: 'WARNING: Host records falsified [Variables: Behavior, Character -> CORRUPT].' },
+            { type: 'err', text: 'SEC_ALARM: Host isolated due to network poisoning.' },
+            { type: 'err', text: 'FATAL: [GUEST_NODE] drained system resources and destroyed source.' },
+            { type: 'sys', text: 'CRITICAL: Preparing countermeasures...' }
         ];
 
         const purgeFiles = [
-            '/sys/config/blind_trust.conf',
-            '/usr/lib/reciprocity_module.dll',
-            '/root/emotional_investment.bak',
-            '/var/logs/shared_history.log',
-            '/bin/false_promises.exe'
+            '/sys/mem/forgotten_favors.tmp',
+            '/var/trust/spread_lies.log',
+            '/root/conscience.bak',
+            '/bin/psychological_manipulation.exe',
+            '/usr/lib/karma_delivery.sh'
         ];
 
         let queue = [...headerLines, ...logs];
@@ -154,6 +150,15 @@
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 if (audioCtx.state === 'suspended') audioCtx.resume();
+                
+                // Forzar desbloqueo de audio reproduciendo un sonido inaudible al tocar
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                gain.gain.value = 0;
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(0);
+                osc.stop(0.1);
             } catch (e) { console.warn(e); }
 
             if (navigator.vibrate) {
@@ -235,7 +240,7 @@
         function showInputTrap() {
             const promptDiv = document.createElement('div');
             promptDiv.className = 'line prompt';
-            promptDiv.innerHTML = '<br>> introduce usario y contraseña...<br>> ';
+            promptDiv.innerHTML = '<br>> SYSTEM CONTAMINATED.<br>> Damage history cannot be erased.<br>> Tap screen to enter Username and Password: ';
             terminal.insertBefore(promptDiv, cursor);
             terminal.scrollTop = terminal.scrollHeight;
             trapReady = true;
