@@ -1,2 +1,0 @@
-0 3 * * * curl "https://www.google.com/ping?sitemap=https://francescacora.info/sitemap.xml"
-0 3 * * * curl "https://www.bing.com/ping?sitemap=https://francescacora.info/sitemap.xml"
